@@ -18,20 +18,28 @@ typedef std::pair<Point_2, Point_2> PointPair;
 typedef std::vector<PointPair> PointPairList;
 typedef std::vector<PointPair>::iterator PointPairListIterator;
 
-enum Algorithm {incremental, convex_hull, onion};
+enum GenerationAlgorithm {incremental, convex_hull, onion};
 enum EdgeSelection {randomSelection, min, max};
 enum Initialization {a1, a2, b1, b2};
+
+enum OptimazationAlgorithm {local_search, simulated_annealing, ant_colony};
+enum AnnealingType {local, global, subdivision};
+enum OptimizationType {minimization, maximization};
 
 struct ArgFlags{
     std::string inputFile;
     std::string outputFile;
-    Algorithm algorithm;
-    EdgeSelection edgeSelection;
-    Initialization initialization;
-    int onionInitialization;
+    OptimazationAlgorithm algorithm;
+    double L;
+    OptimizationType optimizationType;
+    double threshold;
+    AnnealingType annealingType;
 
-    bool showPick;
-    bool showShapes;
+    double alpha;
+    double beta;
+    double ro;
+    int elitism;
+
     bool error;
     std::string errorMessage;
 };

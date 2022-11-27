@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     if(argFlags.error)
     {
         cout << argFlags.errorMessage << endl;
-        cout << "Usage: /to_polygon -i <point set input file> -o <output file> -algorithm <incremental or convex_hull or onion> -edge_selection <1 or 2 or 3 | not for onion> -initialization <1a or 1b or 2a or 2b | only for incremental> -onion_initialization <1 to 5>" << endl;
+        cout << "Usage: /optimal_polygon -i <point set input file> -o <output file> -algorithm <local_search or simulated_annealing or ant_colony> -L [L parameter according to algorithm] -max [maximal area polygonization] -min [minimal area polygonization] -threshold <double> [in local search -annealing <'local' or 'global' or 'subdivision' in simulated annealing>" << endl;
         return -1;
     }
 
@@ -82,36 +82,16 @@ int main(int argc, char **argv)
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-    //write shapes
-    if(argFlags.showShapes)
-    {
-        std::ofstream dump("polygon.wkt"), pointDump("points.wkt"), hullDump("hull.wkt");
-        CGAL::IO::write_polygon_WKT(
-            dump,
-            p
-        );
-        CGAL::IO::write_multi_point_WKT(
-            pointDump,
-            list
-        );
-        CGAL::IO::write_polygon_WKT(
-            hullDump,
-            chp
-        );
-    }
-    
-
     //write output
     writePolygonToFile(argFlags.outputFile, p, argFlags, convexHullArea, duration);
 
     return 0;
 }
 
+
 void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
 {
     int waitingForArg = 0;
-    argFlags.showPick = true;
-    argFlags.showShapes = false;
     bool waitingInput = true;
     bool waitingOutput = true;
     bool waitingAlgorithm = true;
@@ -127,16 +107,24 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                     waitingForArg = 2;
                 else if (!strcmp(arg, "-algorithm"))
                     waitingForArg = 3;
-                else if (!strcmp(arg, "-edge_selection"))
+                else if (!strcmp(arg, "-L"))
                     waitingForArg = 4;
-                else if (!strcmp(arg, "-initialization"))
+                else if (!strcmp(arg, "-threshold"))
                     waitingForArg = 5;
-                else if (!strcmp(arg, "-onion_initialization"))
+                else if (!strcmp(arg, "-annealing"))
                     waitingForArg = 6;
-                else if(!strcmp(arg, "-hide_pick"))
-                    argFlags.showPick = false;
-                else if(!strcmp(arg, "-show_shapes"))
-                    argFlags.showShapes = true;
+                else if (!strcmp(arg, "-alpha"))
+                    waitingForArg = 7;
+                else if (!strcmp(arg, "-beta"))
+                    waitingForArg = 8;
+                else if (!strcmp(arg, "-ro"))
+                    waitingForArg = 9;
+                else if (!strcmp(arg, "-elitism"))
+                    waitingForArg = 10;
+                else if (!strcmp(arg, "-min"))
+                    argFlags.optimizationType = minimization;
+                else if (!strcmp(arg, "-max"))
+                    argFlags.optimizationType = maximization;
                 break;
             case 1:
                 argFlags.inputFile = string(arg);
@@ -149,37 +137,46 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                 waitingForArg = 0;
                 break;
             case 3:
-                if(!strcmp(arg, "incremental"))
-                    argFlags.algorithm = incremental;
-                else if(!strcmp(arg, "convex_hull"))
-                    argFlags.algorithm = convex_hull;
-                else if(!strcmp(arg, "onion"))
-                    argFlags.algorithm = onion;
+                if(!strcmp(arg, "local_search"))
+                    argFlags.algorithm = local_search;
+                else if(!strcmp(arg, "simulated_annealing"))
+                    argFlags.algorithm = simulated_annealing;
+                else if(!strcmp(arg, "ant_colony"))
+                    argFlags.algorithm = ant_colony;
                 waitingAlgorithm = false;
                 waitingForArg = 0;
                 break;
             case 4:
-                if(atoi(arg) == 1)
-                    argFlags.edgeSelection = randomSelection;
-                else if(atoi(arg) == 2)
-                    argFlags.edgeSelection = min;
-                else if(atoi(arg) == 3)
-                    argFlags.edgeSelection = max;
+                argFlags.L = atof(arg);
                 waitingForArg = 0;
                 break;
             case 5:
-                if(!strcmp(arg, "1a"))
-                    argFlags.initialization = a1;
-                else if(!strcmp(arg, "1b"))
-                    argFlags.initialization = b1;
-                else if(!strcmp(arg, "2a"))
-                    argFlags.initialization = a2;
-                else if(!strcmp(arg, "2b"))
-                    argFlags.initialization = b2;
+                argFlags.threshold = atof(arg);
                 waitingForArg = 0;
                 break;
             case 6:
-                argFlags.onionInitialization = atoi(arg);
+                if(!strcmp(arg, "local"))
+                    argFlags.annealingType = local;
+                else if(!strcmp(arg, "global"))
+                    argFlags.annealingType = global;
+                else if(!strcmp(arg, "subdivision"))
+                    argFlags.annealingType = subdivision;
+                waitingForArg = 0;
+                break;
+            case 7:
+                argFlags.alpha = atof(arg);
+                waitingForArg = 0;
+                break;
+            case 8:
+                argFlags.beta = atof(arg);
+                waitingForArg = 0;
+                break;
+            case 9:
+                argFlags.ro = atof(arg);
+                waitingForArg = 0;
+                break;
+            case 10:
+                argFlags.elitism = atoi(arg);
                 waitingForArg = 0;
                 break;
         }
@@ -202,6 +199,7 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
     }
 
     argFlags.error = false;
+    return;
 }
 
 void getPointsFromFile(string filepath, int& size, PointList& points, long& convexHullArea)
@@ -256,7 +254,6 @@ void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, i
 
     double polygonArea =  abs(polygon.area());
     outfile << "area: " << polygonArea << endl;
-    if(argFlags.showPick) outfile << "pick_calculated_area: " << Pick(polygon) << endl;
     outfile << "ratio: " << convexHullArea / polygonArea << endl;
     outfile << "construction time: " << duration.count() << endl;
     return;
@@ -300,11 +297,37 @@ string getAlgorithmString(ArgFlags argFlags){
     return res;
 }
 
-void printArguments(ArgFlags& argFlags){
+void printArguments(ArgFlags& argFlags)
+{
+    string algorithm;
+    if(argFlags.algorithm == local_search)
+        algorithm = "local search";
+    else if(argFlags.algorithm == simulated_annealing)
+        algorithm = "simulated annealing";
+    else
+        algorithm = "ant colony";
+
+    string optimizationType;
+    if(argFlags.optimizationType == maximization)
+        optimizationType = "maximization";
+    else
+        optimizationType = "minimization";
+
+    string annealingType;
+    if(argFlags.annealingType == local)
+        annealingType = "local";
+    else if(argFlags.annealingType == global)
+        annealingType = "global";
+    else
+        annealingType = "subdivision";
+
     cout << "Input file: " << argFlags.inputFile << endl;
     cout << "Output file: " << argFlags.outputFile << endl;
-    cout << "Algorithm: " << argFlags.algorithm << endl;
-    cout << "Edge selection: " << argFlags.edgeSelection << endl;
-    cout << "Initialization: " << argFlags.initialization << endl;
-    cout << "Onion initialization: " << argFlags.onionInitialization << endl;
+    cout << "Algorithm: " << algorithm << endl;
+    cout << "L parameter: " << argFlags.L << endl;
+    cout << "Optimization type: " << optimizationType << endl;
+    cout << "Threshold: " << argFlags.threshold << endl;
+    cout << "Annealing type: " << annealingType << endl;
+
+
 }
