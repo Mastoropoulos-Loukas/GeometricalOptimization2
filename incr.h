@@ -10,9 +10,10 @@
 
 class IncAlgo : public PolygonGenerator{
 private:
-ArgFlags argFlags;
+    Initialization initialization;
+    EdgeSelection edgeSelection;
 public:
-    IncAlgo(PointList&, ArgFlags);
+    IncAlgo(PointList&, Initialization, EdgeSelection);
     virtual Polygon_2 generatePolygon();
 };
 

@@ -1,7 +1,7 @@
-exeDir = "/home/loukas438/DIT/GeometricalOptimization/GeometricalOptimization/build" 
-polygonPath = exeDir + "/polygon.wkt" 
+exeDir = "/home/loukas438/DIT/GeometricalOptimization/GeometricalOptimization2/build" 
+polygonPath = exeDir + "/initial.wkt" 
 pointsPath = exeDir + "/points.wkt" 
-hullPath = exeDir + "/hull.wkt" 
+hullPath = exeDir + "/optimal.wkt" 
 strPolygon = open(polygonPath, 'r').read() 
 strPoints = open(pointsPath, 'r').read() 
 strHull = open(hullPath, 'r').read() 

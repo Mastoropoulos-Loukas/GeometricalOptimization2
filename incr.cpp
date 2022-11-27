@@ -1,7 +1,11 @@
 #include"incr.h"
 #include <climits>
 
-IncAlgo::IncAlgo(PointList& list, ArgFlags argFlags) : PolygonGenerator(list){this->argFlags = argFlags;};
+IncAlgo::IncAlgo(PointList& list, Initialization initialization, EdgeSelection edgeSelection) : PolygonGenerator(list)
+{
+  this->initialization = initialization;
+  this->edgeSelection = edgeSelection;
+};
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 typedef Kernel::Point_2                                          Point;
@@ -107,8 +111,8 @@ int Edgeselection(Polygon_2 poly,Point p,std::vector<Segment_2> segs,int mode){
 
   }
 
-
-  }
+  return -1;
+}
 Polygon_2 IncAlgo::generatePolygon(){
 
   std::vector <Point> vec;
@@ -118,13 +122,13 @@ Polygon_2 IncAlgo::generatePolygon(){
   std::ofstream os2("test12.wkt");
   PurpleEdges edges;
   std::string mode;
-  if(argFlags.initialization==0)
+  if(initialization==0)
     mode="1a";
-  else if(argFlags.initialization==1)
+  else if(initialization==1)
     mode="2a";
-else   if(argFlags.initialization==2)
+else   if(initialization==2)
    mode="1b";
-else   if(argFlags.initialization==3)
+else   if(initialization==3)
    mode="2b";
   
   vec=SortPoints(mode,list);
@@ -158,7 +162,7 @@ else   if(argFlags.initialization==3)
 
     j++;
     if(!points.empty()){
-      pos=Edgeselection(poly,v1[0],points,argFlags.edgeSelection);
+      pos=Edgeselection(poly,v1[0],points,edgeSelection);
       poly.insert(poly.vertices_begin()+pos,v1[0]);
       pos=pos-1;
     }

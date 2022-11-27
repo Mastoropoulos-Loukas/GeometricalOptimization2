@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string.h>
 #include "PolygonGenerator.h"
+#include "PolygonOptimizer.h"
 #include "ConvexHullAlgo.h"
 #include "shared.h"
 #include "onion.h"
@@ -16,21 +17,18 @@ using std::ifstream;
 
 void getPointsFromFile(string filepath, int& size, PointList& points, long& convexHullArea);
 void handleArgs(ArgFlags& argFlags, int& argc, char**& argv);
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, std::chrono::milliseconds duration);
+void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, double initialArea, std::chrono::milliseconds duration);
 string getAlgorithmString(ArgFlags argFlags);
+void printArguments(ArgFlags& argFlags);
 
 //Dummy class just pushes all point in order to the polygon
-class DummyGenerator: public PolygonGenerator{
+class DummyOptimizer: public PolygonOptimizer{
     
 public:
-    DummyGenerator(PointList& list): PolygonGenerator(list){};
+    DummyOptimizer(Polygon_2& polygon): PolygonOptimizer(polygon){};
 
-    virtual Polygon_2 generatePolygon(){
-        Polygon_2 p;
-        for(PointListIterator iter = list.begin(); iter != list.end(); ++iter)
-            p.push_back(*iter);
-
-        return p;
+    virtual Polygon_2 optimalPolygon(){
+        return polygon;
     };
 };
 
@@ -46,6 +44,7 @@ int main(int argc, char **argv)
         cout << "Usage: /optimal_polygon -i <point set input file> -o <output file> -algorithm <local_search or simulated_annealing or ant_colony> -L [L parameter according to algorithm] -max [maximal area polygonization] -min [minimal area polygonization] -threshold <double> [in local search -annealing <'local' or 'global' or 'subdivision' in simulated annealing>" << endl;
         return -1;
     }
+    
 
     //get input
     long convexHullArea; // long because in some files an int is not enoug e.g uniform-0000800-1
@@ -55,39 +54,46 @@ int main(int argc, char **argv)
 
     //calculate convex hull
     Polygon_2 p, chp;
-    PolygonGenerator *generator;
-    switch (argFlags.algorithm)
-    {
-    case incremental:
-        generator = new IncAlgo(list, argFlags);  
-        break;
-    case convex_hull:
-        generator = new ConvexHullAlgo(list, argFlags.edgeSelection);
-        break;
-    case onion:
-        generator = new OnionAlgo(list, argFlags.onionInitialization); 
-        break;
-    default:
-        break;
-    }
 
     CGAL::convex_hull_2(list.begin(), list.end(), std::back_inserter(result));
     for(auto it = result.begin(); it != result.end(); ++it) chp.push_back(*it);
 
-    //calculate polygon
+    PolygonGenerator* generator = new OnionAlgo(list, 3);   //generation
+    p = generator->generatePolygon();
+
+    PolygonOptimizer* optimizer = new DummyOptimizer(p);    //optimization
+    Polygon_2 optimalPolygon;
+    
+    //calculate optimal polygon
     auto start = std::chrono::high_resolution_clock::now();
 
-    p = (*generator).generatePolygon();
-    
+    optimalPolygon = optimizer->optimalPolygon();
+    sleep(1);
+
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    
+    std::ofstream initialDump("initial.wkt"), pointDump("points.wkt"), optimalDump("optimal.wkt");
+    CGAL::IO::write_polygon_WKT(
+        initialDump,
+        p
+    );
+    CGAL::IO::write_multi_point_WKT(
+        pointDump,
+        list
+    );
+    CGAL::IO::write_polygon_WKT(
+        optimalDump,
+        optimalPolygon
+    );
+
+    printArguments(argFlags);
 
     //write output
-    writePolygonToFile(argFlags.outputFile, p, argFlags, convexHullArea, duration);
+    writePolygonToFile(argFlags.outputFile, optimalPolygon, argFlags, convexHullArea, abs(p.area()),duration);
 
     return 0;
 }
-
 
 void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
 {
@@ -242,59 +248,48 @@ void getPointsFromFile(string filepath, int& size, PointList& points, long& conv
     return;
 }
 
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, std::chrono::milliseconds duration){
+string getAlgorithmString(ArgFlags argFlags)
+{
+    string algorithm;
+    if(argFlags.algorithm == local_search)
+        algorithm = "local_search";
+    else if(argFlags.algorithm == simulated_annealing)
+        algorithm = "simulated_annealing";
+    else
+        algorithm = "ant_colony";
+
+    string optimizationType;
+    if(argFlags.optimizationType == maximization)
+        optimizationType = "max";
+    else
+        optimizationType = "min";
+
+    return algorithm + "_" + optimizationType;
+}
+
+void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, double initialArea, std::chrono::milliseconds duration){
     std::ofstream outfile(filepath);
 
-    outfile << "Polygonization" << endl;
+    outfile << "Optimal Area Polygonization" << endl;
+
     for(auto iter = polygon.vertices_begin(); iter != polygon.vertices_end(); ++iter)
         outfile << *iter << endl;
     for(auto iter = polygon.edges_begin(); iter != polygon.edges_end(); ++iter)
         outfile << *iter << endl;
-    outfile << getAlgorithmString(argFlags) << endl;
+    outfile << "Algorithm: " << getAlgorithmString(argFlags) << endl;
 
     double polygonArea =  abs(polygon.area());
+
+    if(argFlags.algorithm != ant_colony)
+        outfile << "area_initial: " << initialArea << endl;
     outfile << "area: " << polygonArea << endl;
+
+    if(argFlags.algorithm != ant_colony)
+        outfile << "ratio_initial: " << convexHullArea / initialArea << endl;
     outfile << "ratio: " << convexHullArea / polygonArea << endl;
+
     outfile << "construction time: " << duration.count() << endl;
     return;
-}
-
-string getAlgorithmString(ArgFlags argFlags){
-
-    string res;
-
-    res += string("Algorithm: ");
-    if(argFlags.algorithm == incremental)
-    {
-        res += string("incremental");
-        res += string("_edge_selection");
-        
-        if(argFlags.edgeSelection == randomSelection) res += string("1");
-        else if(argFlags.edgeSelection == min) res += string("2");    
-        else res += string("3");
-
-        res += string("_initialization");
-        if(argFlags.initialization == a1) res += string("1a");
-        else if(argFlags.initialization == b1) res += string("1b");
-        else if(argFlags.initialization == a2) res += string("2a");
-        else res += string("2b");
-    }
-    else if(argFlags.algorithm == convex_hull) 
-    {
-        res += string("convex_hull");
-        res += string("_edge_selection");
-        if(argFlags.edgeSelection == randomSelection) res += string("1");
-        else if(argFlags.edgeSelection == min) res += string("2");    
-        else res += string("3");
-    
-    }else 
-    {
-        res += string("onion");
-        res += string("_initialization");
-        res += std::to_string(argFlags.onionInitialization);
-    }
-
-    return res;
 }
 
 void printArguments(ArgFlags& argFlags)
@@ -326,8 +321,17 @@ void printArguments(ArgFlags& argFlags)
     cout << "Algorithm: " << algorithm << endl;
     cout << "L parameter: " << argFlags.L << endl;
     cout << "Optimization type: " << optimizationType << endl;
-    cout << "Threshold: " << argFlags.threshold << endl;
-    cout << "Annealing type: " << annealingType << endl;
 
+    if(argFlags.algorithm == local_search)
+        cout << "Threshold: " << argFlags.threshold << endl;
+    if(argFlags.algorithm == simulated_annealing)
+        cout << "Annealing type: " << annealingType << endl;
 
+    if(argFlags.algorithm == ant_colony)
+    {
+        cout << "alpha: " << argFlags.alpha << endl;
+        cout << "beta: " << argFlags.beta << endl;
+        cout << "ro: " << argFlags.ro << endl;
+        cout << "elitism: " << argFlags.elitism << endl;
+    }
 }
