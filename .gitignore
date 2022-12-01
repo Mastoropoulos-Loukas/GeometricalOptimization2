@@ -22,3 +22,6 @@
 !images
 !images/*
 !.gitignore
+!local.h
+!local.cpp
+!PolygonOptimizer.h
