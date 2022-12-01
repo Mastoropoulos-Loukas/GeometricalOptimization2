@@ -1,4 +1,4 @@
-# Polygon Generation
+# Polygon Optimization
 
 Περιεχόμενα <br>
 [Περιγραφή](#a-περιγραφή)<br>
@@ -6,9 +6,9 @@
 [Μεταγλώττιση](#γ-μεταγλώττιση)<br>
 [Οδηγίες Χρήσης](#δ-οδηγίες-χρήσης)<br>
 [Φοιτήτες](#ε-φοιτητές)<br>
-[Incremental](#incremental)<br>
-[Convex Hull](#convex-hull)<br>
-[Onion](#onion)<br>
+[Local Search](#local-search)<br>
+[Simulated Annealing](#simulated-annealing)<br>
+[Ant Colony](#ant-colony)<br>
 
 ## A. Περιγραφή
 <p>
@@ -29,9 +29,9 @@
 Νικόλαος Χαρίσης &nbsp; 1115 2017 00187 <br>
 Θάνος Βάιος   &nbsp;  &nbsp;  1115 2018 00016 <br>
 
-## Incremental
+## Local Search
 
-## Convex Hull
+## Simulated Annealing
 
-## Onion
+## Ant Colony
 <br>
