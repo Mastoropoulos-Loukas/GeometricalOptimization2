@@ -1,0 +1,24 @@
+#ignore everything
+*
+
+#except
+!main.cpp
+!PolygonGenerator.h
+!ConvexHullAlgo.cpp
+!ConvexHullAlgo.h
+!README.md
+!docs
+!docs/*
+!shared.h
+!onion.cpp
+!onion.h
+!/algs/Pick.cpp
+!incr.cpp
+!Pick.cpp
+!incr.cpp
+!incr.h
+!Pick.h
+!pythonQgisScript.py
+!images
+!images/*
+!.gitignore
