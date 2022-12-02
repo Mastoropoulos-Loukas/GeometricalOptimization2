@@ -28,7 +28,7 @@ public:
     DummyOptimizer(Polygon_2& polygon): PolygonOptimizer(polygon){};
 
     virtual Polygon_2 optimalPolygon(){
-        return polygon;
+        return this->poly;
     };
 };
 

@@ -2,12 +2,19 @@
 #define LOCAL_SEARCH
 
 #include "onion.h"
+#include "PolygonOptimizer.h"
 
 
-/*
-    Class goes Here
-*/
+class LocalAlgo : public PolygonOptimizer{
+private:
+    double threshold; //the threshold of the optimization, given in iput
+    OptimizationType type; // the type of the optimization, min or max
+    int length; // the initialization option
+public:
+    LocalAlgo(Polygon_2&, double,OptimizationType,int);
+    virtual Polygon_2 optimalPolygon();
 
+};
 
 typedef struct changePairs{
   Polygon_2::Edge_const_iterator e;
@@ -38,7 +45,7 @@ bool compareAlterMin(const areaChange&,const areaChange&);
 bool findEdgeInPoly(Polygon_2&,Segment_2&);
 bool findVertexInPoly(Polygon_2&,Point_2&);
 
-bool areaImproves(long&,long&,bool);
+bool areaImproves(long&,long&,OptimizationType);
 
 
 #endif
