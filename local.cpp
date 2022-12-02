@@ -79,7 +79,8 @@ Polygon_2 LocalAlgo::optimalPolygon(){
             long ar=abs(candPoly.area());
 
             // we check for validity and improvement
-            if(candPoly.is_simple() && areaImproves(ar,area,type) && finalPoly.size()==candPoly.size()){
+            // candPoly.is_simple() && areaImproves(ar,area,type) && finalPoly.size()==candPoly.size() REMEMBER TO REMOVE
+            if(finalPoly.size()==candPoly.size() && areaImproves(ar,area,type) && candPoly.is_simple()){
 
              
               changePair ev; // we create a change pair to reprent the tuple (e,V)
@@ -128,7 +129,8 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
       // We check whether the edge we need to break is still in the polygon. If it's not we will not apply the change
       // Also we check whether any part of the chain is in the edge we need to break.If there is such part we won't apply the change
-      if(!findEdgeInPoly(finalPoly,edgy) || chainInEdge(it->change.V,edgy)){
+      // !findEdgeInPoly(finalPoly,edgy) || chainInEdge(it->change.V,edgy) REMEMBER TO REMOVE
+      if(chainInEdge(it->change.V,edgy) || !findEdgeInPoly(finalPoly,edgy)){
 
       }else{
         
@@ -136,7 +138,8 @@ Polygon_2 LocalAlgo::optimalPolygon(){
         long ar=polyOnRoids.area();
 
         // And we check for validity and improvement
-        if(polyOnRoids.is_simple() && areaImproves(ar,areaEx,type) && sizeBefore==polyOnRoids.size()){
+        // polyOnRoids.is_simple() && areaImproves(ar,areaEx,type) && sizeBefore==polyOnRoids.size() REMEMBER TO REMOVE
+        if(sizeBefore==polyOnRoids.size() && areaImproves(ar,areaEx,type) && polyOnRoids.is_simple()){
           COUT<<"IMPOVING..."<<ENDL;
           
           improved=true; // we actually improved our polygon
@@ -163,6 +166,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
     }
   }
   
+  // REMOVE IN FINAL BUILD
   if(sizeBefore==finalPoly.size() && finalPoly.is_simple()){
     COUT<<"DONE BUILDING"<<ENDL;
     area=finalPoly.area();
