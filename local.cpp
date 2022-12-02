@@ -28,9 +28,9 @@ Polygon_2 LocalAlgo::optimalPolygon(){
     return finalPoly;
   }
 
-  OptimizationType type=this->type;
+  OptimizationType type=this->type; // the type of the improvement, min or max
 
-  long threshold=this->threshold;
+  long threshold=this->threshold; // the threshold given by the command line
 
   long dt=9223372036854775807; // the difference between the old and the new polygon
   
@@ -79,7 +79,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
             long ar=abs(candPoly.area());
 
             // we check for validity and improvement
-            // candPoly.is_simple() && areaImproves(ar,area,type) && finalPoly.size()==candPoly.size() REMEMBER TO REMOVE
+            // REMEMBER TO REMOVE <candPoly.is_simple() && areaImproves(ar,area,type) && finalPoly.size()==candPoly.size()> REMEMBER TO REMOVE
             if(finalPoly.size()==candPoly.size() && areaImproves(ar,area,type) && candPoly.is_simple()){
 
              
@@ -129,7 +129,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
       // We check whether the edge we need to break is still in the polygon. If it's not we will not apply the change
       // Also we check whether any part of the chain is in the edge we need to break.If there is such part we won't apply the change
-      // !findEdgeInPoly(finalPoly,edgy) || chainInEdge(it->change.V,edgy) REMEMBER TO REMOVE
+      // REMEMBER TO REMOVE <!findEdgeInPoly(finalPoly,edgy) || chainInEdge(it->change.V,edgy)> REMEMBER TO REMOVE
       if(chainInEdge(it->change.V,edgy) || !findEdgeInPoly(finalPoly,edgy)){
 
       }else{
@@ -138,14 +138,14 @@ Polygon_2 LocalAlgo::optimalPolygon(){
         long ar=polyOnRoids.area();
 
         // And we check for validity and improvement
-        // polyOnRoids.is_simple() && areaImproves(ar,areaEx,type) && sizeBefore==polyOnRoids.size() REMEMBER TO REMOVE
+        // REMEMBER TO REMOVE <polyOnRoids.is_simple() && areaImproves(ar,areaEx,type) && sizeBefore==polyOnRoids.size()> REMEMBER TO REMOVE
         if(sizeBefore==polyOnRoids.size() && areaImproves(ar,areaEx,type) && polyOnRoids.is_simple()){
-          COUT<<"IMPOVING..."<<ENDL;
+          COUT<<"IMPOVING..."<<ENDL; // REMOVE IN FINAL BUILD
           
           improved=true; // we actually improved our polygon
           
-          COUT<<"OLD AREA: "<<areaEx<<ENDL;
-          COUT<<"NEW AREA: "<<ar<<ENDL;
+          COUT<<"OLD AREA: "<<areaEx<<ENDL; //REMOVE IN FINAL BUILD
+          COUT<<"NEW AREA: "<<ar<<ENDL; //REMOVE IN FINAL BUILD
           
           // dt differs based on what type of improvement we want
           if(type==maximization){
@@ -153,7 +153,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           }else{
             dt=areaEx-ar;
           }
-          COUT<<"IMPROVED BY "<<dt<<ENDL;
+          COUT<<"IMPROVED BY "<<dt<<ENDL; //REMOVE IN FINAL BUILD
           finalPoly=polyOnRoids;
         }
       }
