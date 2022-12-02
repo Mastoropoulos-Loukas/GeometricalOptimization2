@@ -24,7 +24,7 @@ enum Initialization {a1, a2, b1, b2};
 
 enum OptimazationAlgorithm {local_search, simulated_annealing, ant_colony};
 enum AnnealingType {local, global, subdivision};
-enum OptimizationType {minimization, maximization};
+enum OptimizationType {maximization, minimization};
 
 struct ArgFlags{
     std::string inputFile;
