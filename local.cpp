@@ -1,10 +1,8 @@
 # include "local.h"
 
-
-
-
 // Constructor 
-LocalAlgo::LocalAlgo(Polygon_2& suboptimal,double threshold, OptimizationType type, int length):PolygonOptimizer(suboptimal){
+LocalAlgo::LocalAlgo(Polygon_2& suboptimal,long convexHullArea ,double threshold, OptimizationType type, int length):PolygonOptimizer(suboptimal){
+  this->convexHullArea=convexHullArea;
   this->threshold=threshold;
   this->type=type;
   this->length=length;
@@ -30,15 +28,17 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   OptimizationType type=this->type; // the type of the improvement, min or max
 
-  long threshold=this->threshold; // the threshold given by the command line
+  double threshold=this->threshold; // the threshold given by the command line
+
+  double score = (double)oldArea/(double)(this->convexHullArea); // the score of our polygon, as described in the paper provided
 
   long dt=9223372036854775807; // the difference between the old and the new polygon
   
 
-  std::list<areaChange> possibleChanges; // The list of the changes to ba applied at the suboptimal polygon
+  std::list<areaChange> possibleChanges; // The list of the changes to be applied at the suboptimal polygon
   
   // while the improvement between the old and the new polygon is not negligable
-  while(dt>threshold){
+  while(checkThreshold(threshold,score,type)){
 
     // We iterate over the edges of the polygon
     for (auto eit=finalPoly.edges_begin();eit!=finalPoly.edges_end();eit++){
@@ -105,7 +105,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
     // There is a chance that we found no elligalbe changes. We need to exit
     if(possibleChanges.empty()){
-      dt=threshold-1;
+      score=threshold;
     }
 
     // We sort the list depending on what type of optimization we want
@@ -153,7 +153,9 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           }else{
             dt=areaEx-ar;
           }
-          COUT<<"IMPROVED BY "<<dt<<ENDL; //REMOVE IN FINAL BUILD
+          score=(double) ar/convexHullArea; // the new score
+          COUT<<"IMPROVED BY "<<dt<<ENDL; // REMOVE IN FINAL BUILD
+          COUT<<"SCORE IS "<<score<<ENDL; // REMOVE IN FINAL BUILD
           finalPoly=polyOnRoids;
         }
       }
@@ -162,7 +164,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
     // If we haven't improved in this iteration, there is no need to keep looking
     if(!improved){
-      dt=threshold-1;
+      score=threshold;
     }
   }
   
@@ -170,8 +172,10 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   if(sizeBefore==finalPoly.size() && finalPoly.is_simple()){
     COUT<<"DONE BUILDING"<<ENDL;
     area=finalPoly.area();
+    score=(double)area/convexHullArea;
     COUT<<"OLD AREA WAS "<<oldArea<<ENDL;
     COUT<<"NEW AREA IS  "<<area<<ENDL;
+    COUT<<"SCORE IS "<<score<<ENDL;
   }else{
     
     if(sizeBefore==finalPoly.size()){
@@ -187,6 +191,14 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   return finalPoly;
 }
 
+// We check, based on what kind of optimization we want, whether we have surpassed our threshold
+  bool checkThreshold(double& threshold, double& score, OptimizationType type){
+    if(type==maximization){
+      return (score<threshold);
+    }else{
+      return (score>threshold);
+    }
+  }
 
 // Based on what kind of improvement we desire(min or max), we check whether the area has actually improved
   bool areaImproves(long& areaNew, long& areaOld, OptimizationType type){

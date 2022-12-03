@@ -7,11 +7,12 @@
 
 class LocalAlgo : public PolygonOptimizer{
 private:
-    double threshold; //the threshold of the optimization, given in iput
+    long convexHullArea; // the area of the convexHull, used to calculate the score
+    double threshold; //the threshold of the optimization, given in input. Bigger for better max, smaller for better min
     OptimizationType type; // the type of the optimization, min or max
-    int length; // the initialization option
+    int length; // the length of the chain of points. Must range from 1 to 10
 public:
-    LocalAlgo(Polygon_2&, double,OptimizationType,int);
+    LocalAlgo(Polygon_2&, long ,double,OptimizationType,int);
     virtual Polygon_2 optimalPolygon();
 
 };
@@ -46,6 +47,6 @@ bool findEdgeInPoly(Polygon_2&,Segment_2&);
 bool findVertexInPoly(Polygon_2&,Point_2&);
 
 bool areaImproves(long&,long&,OptimizationType);
-
+bool checkThreshold(double&, double&, OptimizationType);
 
 #endif
