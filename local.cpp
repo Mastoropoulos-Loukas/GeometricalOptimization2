@@ -79,7 +79,6 @@ Polygon_2 LocalAlgo::optimalPolygon(){
             long ar=abs(candPoly.area());
 
             // we check for validity and improvement
-            // REMEMBER TO REMOVE <candPoly.is_simple() && areaImproves(ar,area,type) && finalPoly.size()==candPoly.size()> REMEMBER TO REMOVE
             if(finalPoly.size()==candPoly.size() && areaImproves(ar,area,type) && candPoly.is_simple()){
 
              
@@ -129,16 +128,23 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
       // We check whether the edge we need to break is still in the polygon. If it's not we will not apply the change
       // Also we check whether any part of the chain is in the edge we need to break.If there is such part we won't apply the change
-      // REMEMBER TO REMOVE <!findEdgeInPoly(finalPoly,edgy) || chainInEdge(it->change.V,edgy)> REMEMBER TO REMOVE
-      if(chainInEdge(it->change.V,edgy) || !findEdgeInPoly(finalPoly,edgy)){
+      // Furthermore, we check whether we reached the section with the already applied changes
+      if((type==maximization && it->area==-1) || (type==minimization && it->area==this->convexHullArea) 
+          || chainInEdge(it->change.V,edgy) || !findEdgeInPoly(finalPoly,edgy)){
+        
+        if(type==maximization && it->area==-1){
+          break;
+        }
 
+        if(type==minimization && it->area==this->convexHullArea){
+          break;
+        }
       }else{
         
         applyChanges(polyOnRoids,it->change.V,it->change.e); // we apply the change
         long ar=polyOnRoids.area();
 
         // And we check for validity and improvement
-        // REMEMBER TO REMOVE <polyOnRoids.is_simple() && areaImproves(ar,areaEx,type) && sizeBefore==polyOnRoids.size()> REMEMBER TO REMOVE
         if(sizeBefore==polyOnRoids.size() && areaImproves(ar,areaEx,type) && polyOnRoids.is_simple()){
           COUT<<"IMPOVING..."<<ENDL; // REMOVE IN FINAL BUILD
           
@@ -156,7 +162,14 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           score=(double) ar/convexHullArea; // the new score
           COUT<<"IMPROVED BY "<<dt<<ENDL; // REMOVE IN FINAL BUILD
           COUT<<"SCORE IS "<<score<<ENDL; // REMOVE IN FINAL BUILD
-          finalPoly=polyOnRoids;
+          
+          if(type==maximization){ // We mark the changes we applied, based on what kind of improvement we want
+            it->area=-1;
+          }else{
+            it->area=this->convexHullArea;
+          }
+          
+          finalPoly=polyOnRoids; // Our polygon becomes the new and improved one
         }
       }
 
@@ -165,6 +178,12 @@ Polygon_2 LocalAlgo::optimalPolygon(){
     // If we haven't improved in this iteration, there is no need to keep looking
     if(!improved){
       score=threshold;
+    }else{ // If we have improved, we need to reorganize our list so that the applied changes are in the end
+      if(type==maximization){
+        possibleChanges.sort(compareAlterMax);
+      }else{
+        possibleChanges.sort(compareAlterMin);
+      }      
     }
   }
   
