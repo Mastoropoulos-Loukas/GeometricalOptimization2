@@ -9,6 +9,7 @@
 #include "shared.h"
 #include "onion.h"
 #include "incr.h"
+#include "local.h"
   
 using std::cout;
 using std::endl;
