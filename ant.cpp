@@ -211,14 +211,13 @@ std::vector<Point> list){
 Polygon_2 check;
 std::vector<Polygon_2> temp;
 std::vector <Segment_2> segs;
-Polygon_2 hull;
   int i=0;
   int pos=0;
   int j=0;
 
 
     Point points[space.size()] ;
-
+    
      for (auto vi = space.vertices_begin(); vi != space.vertices_end(); ++vi,++j)
     {
        points[j]=vi[0];
@@ -230,14 +229,14 @@ for (auto v1=list.begin();v1!=list.end();++v1,++k)
   
   
   
-
+//See if the point is outside the polygon
 if(check_inside_Ant(v1[0],points,points+space.size(),Kernel())==2){
 
       segs=CheckPolAnt(space,v1[0],0);
     
-
+      //Generate all the edges that can be replaced
      for(auto s=segs.begin();s!=segs.end();++s){
-
+      //For every edge find its pos in the polygon 
     int i=0;
           for(auto v3=space.edges_begin();v3!=space.edges_end();++v3,i++)
           if(v3[0]==s[0]){
@@ -256,10 +255,13 @@ if(check_inside_Ant(v1[0],points,points+space.size(),Kernel())==2){
        points2[y]=vi[0];
      }
        for (auto v2=list.begin();v2!=list.end();++v2)
-{    
+{    //Now see that no other point in the set is inside the new polygon 
 if(check_inside_Ant(v2[0],points2,points2+check.size(),Kernel())==0)
 {flag=1;
 }
+
+//If flag=0 then no point is inside ,so the polygon is valid,add it to the return list and to the pointpoped map that returns the point that was added in case
+//we eventually pick this polygon so we can pop it out of our set.
 }if(flag==0){
        temp.push_back(check);
        Pointpoped[convert(check)]=k;
@@ -282,7 +284,7 @@ if(check_inside_Ant(v2[0],points2,points2+check.size(),Kernel())==0)
 
 return temp;
 }
-
+//Takes a polygon and converts it to a string 
 std::string convert(Polygon_2 lis)
 {
 
@@ -336,6 +338,7 @@ double MaxOrMin(int area,int mode)
 Polygon_2 Ant::optimalPolygon(){
 
     std::vector<Polygon_2> space;
+    
     std::vector<Polygon_2> temp;
     std::vector<Polygon_2> adder;
     Polygon_2 next;
@@ -365,6 +368,10 @@ Polygon_2 Ant::optimalPolygon(){
     Polygon_2 BestForCircle;
     space= Generate3(test);
     int AreaOfAllTriangles=0;
+    //add every triangle to the graph
+    //Every polygon has a number assosiated with it, that is stored in enumvals
+    //Using that number we can get the polygon back from polymap
+    //We also store the polygons in a map so we know when an x-agon is already made in another node
     for(auto v=space.begin();v!=space.end();++v){
         enumvals[convert(v[0])]=pos;
         table2.h=v[0].area();
@@ -385,7 +392,7 @@ Polygon_2 Ant::optimalPolygon(){
 
     ph=2;
     int elitism=argFlags.elitism;
-    std::cout<<pos<<std::endl;
+    
     for(int c=0;c<C;c++){
         for(int k=0;k<K;k++){
             temp.clear();
@@ -394,7 +401,10 @@ Polygon_2 Ant::optimalPolygon(){
             int triangle=0;
             double prob=0;
 
-
+            //Choose from which triangle to start, if you want to minimize it will give a higher chance for smaller triangles 
+            //For maximize it will gie a higher chance for larger triangles
+            //The chance is calculated similar to the prob chance later on but instead of doing p*h it just looks for the area of the triangle compared to
+            // the average area of all the triangles
             for (auto t1=space.begin();t1!=space.end();++t1,++triangle){
 
                 if(mode==1)
@@ -432,11 +442,11 @@ Polygon_2 Ant::optimalPolygon(){
 
             for(int i=2;i<=test.size();i++){
 
-
+                //for every point left,generate a list of polygons, pick one ,generate a list of polygons ......
                 num.push_back(enumvals[convert(next)]);
                 if(i==test.size()-1)
                     break;
-
+                //If the node has already been created load the children "nodes" 
                 if(polymap.find(enumvals[convert(next)])!=polymap.end()){
 
                     temp=polymap[enumvals[convert(next)]];
@@ -447,10 +457,10 @@ Polygon_2 Ant::optimalPolygon(){
                     polymap[enumvals[convert(next)]]=temp;
 
                 }
-
-
+                //For every polygon
+                
                 for (auto t1=temp.begin();t1!=temp.end();++t1){
-    
+                    //If there is none x-agon yet add them to the map
                     if(map.size()<=i-2){
     
                         adder.push_back(t1[0]);
@@ -466,6 +476,7 @@ Polygon_2 Ant::optimalPolygon(){
                         table1=add_edge(table1,enumvals[convert(next)],table2,nullptr);
                         tablebot.push_back(table2);
                     }
+                    //Else if there is a map but the polygon is not inside yet
                     else
                     if(!isin(map[i-2],t1[0])){
                         enumvals[convert(t1[0])]=pos;
@@ -482,9 +493,11 @@ Polygon_2 Ant::optimalPolygon(){
 
                         tablebot.push_back(table2);
                         adder.push_back(t1[0]);
+                        //Add the polygon to the graph
 
                     }else{
-                        dupes++;
+                        //If the polygon has been made already add the nobe but change hasbranch to 1, which means that this is a branch of another node
+                        //This is done using a custom adjacent list 
                         table2.poly=enumvals[convert(t1[0])];
                         table1.resize(table1.size()+1);
                         table2.hasbranch=1;
@@ -502,12 +515,16 @@ Polygon_2 Ant::optimalPolygon(){
                     table2.hasbranch=0;
     
                 }
+                //Add the polygons to the map
+                
     
                 map.push_back(adder);
 
                 adder.clear();
 
                 int t=0;
+                //For every polygon calculate the prob chance and then see if you take that polygon as the next
+                //In case that no prob passes the test( unlikely) just take the last polygon
                 for (auto t1=temp.begin();t1!=temp.end();++t1,++t){
                     std::list<table>::iterator it=tablebot.begin();
                     advance(it,t);
@@ -530,7 +547,7 @@ Polygon_2 Ant::optimalPolygon(){
     
             paths[k]=num;
             num.clear();
-
+            //Evaporate the pheromone
             for(auto it1 = table1.begin(); it1 != table1.end(); ++it1) {
                 std::list<table>::iterator it;
                 for (it = it1[0].begin(); it != it1[0].end(); ++it){
@@ -538,6 +555,7 @@ Polygon_2 Ant::optimalPolygon(){
                 }
 
             }
+            //Find the max or min area that this ant has found
             if(mode==0){
                 if(max<abs(next.area())){
 
@@ -555,6 +573,7 @@ Polygon_2 Ant::optimalPolygon(){
                 }
             }
         }
+        //Find the max or min that any ant has found in any circle
         if(mode==0){
             if(max1<abs(BestFor1Ant.area())){
 
@@ -571,11 +590,12 @@ Polygon_2 Ant::optimalPolygon(){
                 elitismpos=elitismk;
             }
         }
-
+        //If elisitm is 0 then the entire table of solution paths is given to updatetrails so every ant adds pheromone to its path
         if(elitism==0){
             for( int t=0;t<K;t++)
                 table1=UpdateTrails(table1,paths[t],space[0].area(),tables,MaxOrMin(space[0].area(),mode));
         }
+        //Else take only the path that is the best (elitismpos)
         else{
             table1=UpdateTrails(table1,paths[elitismpos],space[0].area(),tables,MaxOrMin(space[0].area(),mode));
 
@@ -585,7 +605,7 @@ Polygon_2 Ant::optimalPolygon(){
 
     Polygon_2 poly;
 
-
+    //Finally return the max or min polygon
     poly=BestForCircle;
     std::ofstream os("test.wkt");
 
