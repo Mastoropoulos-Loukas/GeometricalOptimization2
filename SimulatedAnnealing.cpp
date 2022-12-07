@@ -1,7 +1,7 @@
 #include "SimulatedAnnealing.h"
 #include <random>
 
-using std::cout, std::endl;
+using std::cout; using std::endl;
 
 SimulatedAnnealing::SimulatedAnnealing(Polygon_2& initial, double cHullArea, ArgFlags argFlags) : PolygonOptimizer(initial)
 {
