@@ -437,11 +437,11 @@ tablebot.clear();
 
 std::vector<Point> test1=test;
 
-for(int i=3;i<=test.size();i++){
+for(int i=2;i<=test.size();i++){
 
 
  num.push_back(enumvals[convert(next)]);
- if(i==test1.size())
+ if(i==test.size()-1)
  break;
 
 if(polymap.find(enumvals[convert(next)])!=polymap.end()){
@@ -457,10 +457,7 @@ temp=polymap[enumvals[convert(next)]];
 
 
  for (auto t1=temp.begin();t1!=temp.end();++t1){
-  if(!t1[0].is_simple()){
-
-std::cout<<"a"<<std::endl;
-  }
+ 
   if(map.size()<=i-2){
   
   adder.push_back(t1[0]);
