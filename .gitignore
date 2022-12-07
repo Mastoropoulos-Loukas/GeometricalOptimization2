@@ -27,3 +27,5 @@
 !PolygonOptimizer.h
 !SimulatedAnnealing.cpp
 !SimulatedAnnealing.h
+!ant.h
+!ant.cpp
