@@ -19,6 +19,17 @@ public:
     double minimizationEnergy();
     double maximizationEnergy();
     double getEnergy();
+    void moveVertex(PointListIterator, PointListIterator);
+
+    bool validityLocal(Point_2, Point_2, Point_2, Point_2, Tree&);
+
+    Segment_2 getEdgeFromSource(Point_2);
+    Segment_2 getEdgeFromTarget(Point_2);
+
+    Polygon_2 localAnnealing();
+    Polygon_2 globalAnnealing();
+    Polygon_2 subdivisionAnnealing();
+    
 
     SimulatedAnnealing(Polygon_2&, double, ArgFlags);
     virtual Polygon_2 optimalPolygon();

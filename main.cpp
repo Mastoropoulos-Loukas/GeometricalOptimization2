@@ -101,19 +101,20 @@ int main(int argc, char **argv)
             break;
     }
     //calculate optimal polygon
-    auto start = std::chrono::high_resolution_clock::now();
-
-    optimalPolygon = optimizer->optimalPolygon();
-    sleep(1);
-
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    
     std::ofstream initialDump("initial.wkt"), pointDump("points.wkt"), optimalDump("optimal.wkt");
     CGAL::IO::write_polygon_WKT(
         initialDump,
         p
     );
+    
+    auto start = std::chrono::high_resolution_clock::now();
+
+    optimalPolygon = optimizer->optimalPolygon();
+
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    
+    
     CGAL::IO::write_multi_point_WKT(
         pointDump,
         list
@@ -123,7 +124,7 @@ int main(int argc, char **argv)
         optimalPolygon
     );
 
-    printArguments(argFlags);
+    // printArguments(argFlags);
 
     //write output
     writePolygonToFile(argFlags.outputFile, optimalPolygon, argFlags, convexHullArea, abs(p.area()),duration);

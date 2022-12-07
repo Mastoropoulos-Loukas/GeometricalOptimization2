@@ -5,6 +5,9 @@
 #include <CGAL/Polygon_2.h>
 #include <CGAL/IO/WKT.h>
 #include <CGAL/convex_hull_2.h>
+#include <CGAL/Kd_tree.h>
+#include <CGAL/Fuzzy_iso_box.h>
+#include <CGAL/Search_traits_2.h>
 #include <iostream>
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
@@ -17,6 +20,10 @@ typedef Polygon_2::Edge_const_iterator EdgeIterator;
 typedef std::pair<Point_2, Point_2> PointPair;
 typedef std::vector<PointPair> PointPairList;
 typedef std::vector<PointPair>::iterator PointPairListIterator;
+
+typedef CGAL::Search_traits_2<Kernel> Traits;
+typedef CGAL::Kd_tree<Traits> Tree;
+typedef CGAL::Fuzzy_iso_box<Traits> Fuzzy_iso_box;
 
 enum GenerationAlgorithm {incremental, convex_hull, onion};
 enum EdgeSelection {randomSelection, min, max};
