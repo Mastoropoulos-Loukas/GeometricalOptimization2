@@ -13,7 +13,7 @@ private:
 ArgFlags argFlags;
 PointList list;
 public:
-Ant(Polygon_2& poly, ArgFlags argFlags,PointList list);
+Ant( ArgFlags argFlags,PointList list);
     virtual Polygon_2 optimalPolygon();
 };
 

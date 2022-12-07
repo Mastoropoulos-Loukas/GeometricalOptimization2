@@ -2,7 +2,7 @@
 #include <climits>
 #include <map>
 
-Ant::Ant(Polygon_2& poly, ArgFlags argFlags,PointList list) : PolygonOptimizer(poly){
+Ant::Ant(ArgFlags argFlags,PointList list) : PolygonOptimizer(poly){
   this->argFlags = argFlags;
   this->list=list;
   
@@ -14,18 +14,13 @@ bool IsFeasible(Polygon_2 ,Point );
 int ProbFunction();
 int ph=1;
 std::string convert(Polygon_2);
+
 struct ant
 {
 int father;
 int pos;
 };
-struct PurpleEdges{
-
-  Point x;
-  Point y;
-  int exists=0;
-
-};
+//This is the node for the graph
 struct table{
 
 int poly;
@@ -33,16 +28,14 @@ double  t=ph;
 int h;
 bool hasbranch=0;
 };
-struct antlist
-{
-    std::vector<Segment_2> listofsegs;
-    std::vector<int> listofpher;
 
-};
+
 
 std::map <std::string,int> Pointpoped;
 
-double ProbFunction(int a , int b,table tabletop,std::list<table> tablebot){
+
+double ProbFunction(int a , int b,table tabletop,std::list<table> tablebot)//Prob function that returns the chance of an ant moving to node i
+{
 
 
 
@@ -51,6 +44,7 @@ top=pow(tabletop.t,a)*pow(tabletop.h,b);
 double bot =0;
 
 std::list<table>::iterator it;
+//Find the p^a*h^b for all the other fiesible points
 for (it = tablebot.begin(); it != tablebot.end(); ++it){
     bot+=pow(it->t,a)*pow(it->h,b);
     
@@ -71,6 +65,7 @@ return top/bot;
 std::vector<std::list<table>>  UpdateTrails(std::vector<std::list<table>> table1, std::vector <int> points, double area,std::map <int,std::vector<ant>> tables,
 double par){
  
+//UpdateTrails will find the nodes that more than 1 ant went through and update them, and then it will reduce the pheoromone by ro,its done in optimizerpolygon
 
 std::vector<std::list<table>>  ret=table1;
  int prev=0;
@@ -129,6 +124,7 @@ prev=v1[0];
 
 
 }
+//See if a point lies inside the polygon or not to find the fiesible points
 int check_inside_Ant(Point pt, Point *pgn_begin, Point *pgn_end, Kernel traits)
 { 
   switch(CGAL::bounded_side_2(pgn_begin, pgn_end,pt, traits)) {
@@ -146,10 +142,10 @@ int check_inside_Ant(Point pt, Point *pgn_begin, Point *pgn_end, Kernel traits)
 
 }
 
-std::vector<Segment_2> CheckPolAnt(Polygon_2 ,Point ,int ,PurpleEdges);
+std::vector<Segment_2> CheckPolAnt(Polygon_2 ,Point ,int );
 
-PurpleEdges CheckHullAnt(Polygon_2 ,Point ,int );
 
+//Generate all the triangles that can be made in the given set of points
 std::vector<Polygon_2> Generate3(std::vector<Point> list){
 Polygon_2 poly;
 int flag=0;
@@ -208,13 +204,12 @@ return res;
 
 
 
+//Generate a list of x-agons
 
-//remember to remove the issue
 std::vector<Polygon_2> GenerateX(Polygon_2 space,
 std::vector<Point> list){
 Polygon_2 check;
 std::vector<Polygon_2> temp;
-PurpleEdges edges;
 std::vector <Segment_2> segs;
 Polygon_2 hull;
   int i=0;
@@ -238,7 +233,7 @@ for (auto v1=list.begin();v1!=list.end();++v1,++k)
 
 if(check_inside_Ant(v1[0],points,points+space.size(),Kernel())==2){
 
-      segs=CheckPolAnt(space,v1[0],0,edges);
+      segs=CheckPolAnt(space,v1[0],0);
     
 
      for(auto s=segs.begin();s!=segs.end();++s){
@@ -304,7 +299,7 @@ return ret;
 }
 
 
-
+//add 1 node to the graph
 std::vector<std::list<table>> add_edge(std::vector<std::list<table>> adj_list, int v,table t, int * val) { 
 
 std::vector<std::list<table>> ret=adj_list;
@@ -315,7 +310,7 @@ return ret;
 }
 
 
-
+// return if the given polygon has already been created elsewhere
 bool isin( std::vector<Polygon_2> map,Polygon_2 poly){
 
 
@@ -327,7 +322,7 @@ bool isin( std::vector<Polygon_2> map,Polygon_2 poly){
   return 0;
 }
 
-
+//Depending on Max or Min algorythm ,return either 1 or 1/area^2 so that updatetrails changes the pheromone accordingly
 double MaxOrMin(int area,int mode)
 {
   if(mode==0)
@@ -369,11 +364,11 @@ int dupes=0;
     int elitismk=0;
 Polygon_2 BestForCircle;
  space= Generate3(test);
- int AreaOfAllTriangels=0;
+ int AreaOfAllTriangles=0;
  for(auto v=space.begin();v!=space.end();++v){
  enumvals[convert(v[0])]=pos;
   table2.h=v[0].area();
-AreaOfAllTriangels+=abs(v[0].area());
+AreaOfAllTriangles+=abs(v[0].area());
   table2.poly=pos;
   table1.resize(table1.size()+1);
   table1=add_edge(table1,pos,table2,nullptr);
@@ -381,7 +376,7 @@ AreaOfAllTriangels+=abs(v[0].area());
   pos++;
 
  }
-AreaOfAllTriangels=AreaOfAllTriangels/space.size();
+AreaOfAllTriangles=AreaOfAllTriangles/space.size();
 
 map.push_back(space);
 std::list<table> tablebot;
@@ -406,7 +401,7 @@ for (auto t1=space.begin();t1!=space.end();++t1,++triangle){
 if(mode==1)
 {
 
-prob=AreaOfAllTriangels/t1[0].area();
+prob=AreaOfAllTriangles/t1[0].area();
 prob/=100;
  int var=rand()%2;
 
@@ -419,7 +414,7 @@ break;
 }
 }
 else{
-prob=t1[0].area()/AreaOfAllTriangels;
+prob=t1[0].area()/AreaOfAllTriangles;
 prob/=100;
  int var=rand()%2;
 
@@ -547,9 +542,6 @@ test1.erase(test1.begin()+Pointpoped[convert(next)]);
  
 
 
-// for(auto v=num.begin();v!=num.end();++v)
-// std::cout<<" -> "<<v[0];
-// std::cout<<std::endl;
 
   
   paths[k]=num;
@@ -624,7 +616,9 @@ if(elitism==0){
 
 }
 
-std::vector<Segment_2> CheckPolAnt(Polygon_2 poly,Point p,int pos,PurpleEdges edges){
+
+//find the poss edges that can be replaced
+std::vector<Segment_2> CheckPolAnt(Polygon_2 poly,Point p,int pos){
 
   
   std::vector<Segment_2> res;
