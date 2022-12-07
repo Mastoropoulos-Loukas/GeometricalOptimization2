@@ -3,13 +3,19 @@
 #include <chrono>
 #include <cstdlib>
 #include <string.h>
+
+#include "shared.h"
+
 #include "PolygonGenerator.h"
 #include "PolygonOptimizer.h"
+
 #include "ConvexHullAlgo.h"
-#include "shared.h"
 #include "onion.h"
 #include "incr.h"
+
 #include "local.h"
+#include "SimulatedAnnealing.h"
+#include "ant.h"
   
 using std::cout;
 using std::endl;
@@ -59,12 +65,41 @@ int main(int argc, char **argv)
     CGAL::convex_hull_2(list.begin(), list.end(), std::back_inserter(result));
     for(auto it = result.begin(); it != result.end(); ++it) chp.push_back(*it);
 
-    PolygonGenerator* generator = new OnionAlgo(list, 3);   //generation
+    PolygonGenerator* generator;   //generation
+    
+    switch(argFlags.genAlg){
+        case incremental:
+            generator= new IncAlgo(list,argFlags.initialization,argFlags.edgeSelection);
+            break;
+        case convex_hull:
+            generator= new ConvexHullAlgo(list,argFlags.edgeSelection);
+            break;
+        case onion:
+            generator= new OnionAlgo(list,3);
+            break;
+        default:
+            break;
+    }
+
     p = generator->generatePolygon();
 
-    PolygonOptimizer* optimizer = new DummyOptimizer(p);    //optimization
+    PolygonOptimizer* optimizer;    //optimization
     Polygon_2 optimalPolygon;
     
+
+    switch(argFlags.algorithm){
+        case local_search:
+            optimizer= new LocalAlgo(p,convexHullArea,argFlags.threshold,argFlags.optimizationType,argFlags.L);
+            break;
+        case simulated_annealing:
+            optimizer= new SimulatedAnnealing(p,(double) convexHullArea, argFlags);
+            break;
+        case ant_colony:
+            optimizer= new Ant(argFlags,list,p);
+            break;
+        default:
+            break;
+    }
     //calculate optimal polygon
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -102,6 +137,7 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
     bool waitingInput = true;
     bool waitingOutput = true;
     bool waitingAlgorithm = true;
+    bool waitingGenAlgorithm=true;
     for (int i = 1; i < argc; i++)
     {
         char* arg = argv[i];
@@ -128,6 +164,8 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                     waitingForArg = 9;
                 else if (!strcmp(arg, "-elitism"))
                     waitingForArg = 10;
+                else if (!strcmp(arg,"-gen"))
+                    waitingForArg=11;
                 else if (!strcmp(arg, "-min"))
                     argFlags.optimizationType = minimization;
                 else if (!strcmp(arg, "-max"))
@@ -186,12 +224,28 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                 argFlags.elitism = atoi(arg);
                 waitingForArg = 0;
                 break;
+            case 11:
+                if(!strcmp(arg, "incremental"))
+                    argFlags.genAlg = incremental;
+                else if(!strcmp(arg, "convex_hull"))
+                    argFlags.genAlg = convex_hull;
+                else if(!strcmp(arg, "onion"))
+                    argFlags.genAlg = onion;                
+                if(argFlags.optimizationType==maximization){
+                    argFlags.edgeSelection=min;
+                }else{
+                    argFlags.edgeSelection=max;
+                }
+                argFlags.initialization=a1;
+                waitingGenAlgorithm=false;
+                waitingForArg=0;
+                break;
         }
     }
 
     if(waitingAlgorithm){
         argFlags.error = true;
-        argFlags.errorMessage = string("Must select algorithm");
+        argFlags.errorMessage = string("Must select optimization algorithm");
         return;
     }
     if(waitingInput){
@@ -202,6 +256,12 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
     if(waitingOutput){
         argFlags.error = true;
         argFlags.errorMessage = string("Must select output file");
+        return;
+    }
+
+    if(waitingGenAlgorithm){
+        argFlags.error = true;
+        argFlags.errorMessage = string("Must select generation algorithm");
         return;
     }
 

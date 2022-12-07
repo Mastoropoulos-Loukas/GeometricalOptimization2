@@ -29,6 +29,11 @@ enum OptimizationType {maximization, minimization};
 struct ArgFlags{
     std::string inputFile;
     std::string outputFile;
+    
+    GenerationAlgorithm genAlg;
+    EdgeSelection  edgeSelection;
+    Initialization initialization;
+    
     OptimazationAlgorithm algorithm;
     int L;
     OptimizationType optimizationType;
