@@ -154,7 +154,7 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                 waitingForArg = 0;
                 break;
             case 4:
-                argFlags.L = atof(arg);
+                argFlags.L = atoi(arg);
                 waitingForArg = 0;
                 break;
             case 5:

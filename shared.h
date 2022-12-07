@@ -30,7 +30,7 @@ struct ArgFlags{
     std::string inputFile;
     std::string outputFile;
     OptimazationAlgorithm algorithm;
-    double L;
+    int L;
     OptimizationType optimizationType;
     double threshold;
     AnnealingType annealingType;
