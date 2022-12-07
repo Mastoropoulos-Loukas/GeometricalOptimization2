@@ -194,15 +194,15 @@ Polygon_2 LocalAlgo::optimalPolygon(){
     score=(double)area/convexHullArea;
     COUT<<"OLD AREA WAS "<<oldArea<<ENDL;
     COUT<<"NEW AREA IS  "<<area<<ENDL;
-    COUT<<"SCORE IS "<<score<<ENDL;
+    COUT<<"SCORE IS "<<score<<ENDL<<ENDL;
   }else{
     
     if(sizeBefore==finalPoly.size()){
-      COUT<<"POINTS MISSING: "<<sizeBefore-finalPoly.size()<<ENDL;
+      COUT<<"POINTS MISSING: "<<sizeBefore-finalPoly.size()<<ENDL<<ENDL;
     }
   
     if(!finalPoly.is_simple()){
-      COUT<<"NEW POLYGON IS NOT SIMPLE"<<ENDL;
+      COUT<<"NEW POLYGON IS NOT SIMPLE"<<ENDL<<ENDL;
     }
 
   }
