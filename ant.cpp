@@ -2,7 +2,7 @@
 #include <climits>
 #include <map>
 
-Ant::Ant(ArgFlags argFlags,PointList list) : PolygonOptimizer(poly){
+Ant::Ant(ArgFlags argFlags,PointList list, Polygon_2& poly) : PolygonOptimizer(poly){
   this->argFlags = argFlags;
   this->list=list;
   
