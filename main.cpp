@@ -129,6 +129,9 @@ int main(int argc, char **argv)
     //write output
     writePolygonToFile(argFlags.outputFile, optimalPolygon, argFlags, convexHullArea, abs(p.area()),duration);
 
+    delete generator;
+    delete optimizer;
+
     return 0;
 }
 
@@ -226,17 +229,23 @@ void handleArgs(ArgFlags& argFlags, int& argc, char**& argv)
                 waitingForArg = 0;
                 break;
             case 11:
-                if(!strcmp(arg, "incremental"))
+                if(!strcmp(arg, "incremental")){
                     argFlags.genAlg = incremental;
-                else if(!strcmp(arg, "convex_hull"))
+                    if(argFlags.optimizationType==maximization){
+                        argFlags.edgeSelection=max;
+                    }else{
+                        argFlags.edgeSelection=min;
+                    }
+                }else if(!strcmp(arg, "convex_hull")){
                     argFlags.genAlg = convex_hull;
-                else if(!strcmp(arg, "onion"))
+                    if(argFlags.optimizationType==maximization){
+                        argFlags.edgeSelection=min;
+                    }else{
+                        argFlags.edgeSelection=max;
+                     }
+                }else if(!strcmp(arg, "onion"))
                     argFlags.genAlg = onion;                
-                if(argFlags.optimizationType==maximization){
-                    argFlags.edgeSelection=min;
-                }else{
-                    argFlags.edgeSelection=max;
-                }
+
                 argFlags.initialization=a1;
                 waitingGenAlgorithm=false;
                 waitingForArg=0;
