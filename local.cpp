@@ -22,7 +22,14 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   int length=this->length;
 
   if (length<=0 || length>=finalPoly.size() || length>10){
-    COUT<<"L must range from 1 to 10 "<<ENDL;
+    if(length <=0 || length>10){    
+      COUT<<"L must range from 1 to 10 "<<ENDL;
+    }
+
+    if(length>=finalPoly.size()){
+      COUT<<"L must range from 1 to "<< finalPoly.size() -1<<ENDL;      
+    }
+
     return finalPoly;
   }
 
@@ -142,7 +149,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
       }else{
         
         applyChanges(polyOnRoids,it->change.V,it->change.e); // we apply the change
-        long ar=polyOnRoids.area();
+        long ar=abs(polyOnRoids.area());
 
         // And we check for validity and improvement
         if(sizeBefore==polyOnRoids.size() && areaImproves(ar,areaEx,type) && polyOnRoids.is_simple()){
@@ -190,7 +197,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   // REMOVE IN FINAL BUILD
   if(sizeBefore==finalPoly.size() && finalPoly.is_simple()){
     COUT<<"DONE BUILDING"<<ENDL;
-    area=finalPoly.area();
+    area=abs(finalPoly.area());
     score=(double)area/convexHullArea;
     COUT<<"OLD AREA WAS "<<oldArea<<ENDL;
     COUT<<"NEW AREA IS  "<<area<<ENDL;
