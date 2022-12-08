@@ -98,7 +98,6 @@ void initializeTree(Tree& tree, Polygon_2& poly)
     }
 }
 
-
 Segment_2 nullSegment(){return Segment_2(Point_2(0,0), Point_2(0,0));}
 
 Segment_2 SimulatedAnnealing::getEdgeFromSource(Point_2 source)
@@ -143,7 +142,6 @@ Segment_2 SimulatedAnnealing::getEdgeFromTarget(Point_2 target)
     return nullSegment();
 }
 
-
 bool SimulatedAnnealing::validityLocal(Point_2 q, Point_2 r, Point_2 s, Point_2 p, Tree& tree)
 {
 
@@ -180,6 +178,68 @@ bool SimulatedAnnealing::validityLocal(Point_2 q, Point_2 r, Point_2 s, Point_2 
         )
             return false;
 
+    }
+
+    return true;
+
+}
+
+bool SimulatedAnnealing::validityGlobal(Point_2 q, Point_2 r, Point_2 s, Point_2 p, Point_2 t)
+{
+    Segment_2 edgePR(p, r);
+    Segment_2 edgeSQ(s, q);
+    Segment_2 edgeQT(q, t);
+    
+    if
+    (
+        CGAL::do_intersect(edgePR, edgeSQ) ||
+        CGAL::do_intersect(edgePR, edgeQT)
+    )
+    {
+        return false;
+    }
+
+    PointListIterator begin = poly.vertices_begin();
+    PointListIterator end = poly.vertices_end();
+    PointListIterator iter;
+    Point_2 source, target;
+    Segment_2 currEdge;
+    
+    for(iter = begin; iter != end; ++iter)
+    {
+        source = *iter;
+        target = (iter == end - 1) ? *begin : *(iter+1);
+        currEdge = Segment_2(source, target);
+
+        if
+        (
+            CGAL::do_intersect(edgePR, currEdge) &&
+            (source != p && source != r) &&
+            (target != p && target != r)
+        )
+        {
+            return false;
+        }
+        if
+        (
+            CGAL::do_intersect(edgeSQ, currEdge) &&
+            (source != s && source != q) &&
+            (target != s && target != q)
+        )
+        {
+            return false;
+        }
+        if
+        (
+            CGAL::do_intersect(edgeQT, currEdge) &&
+            (source != q && source != t) &&
+            (target != q && target != t)
+        )
+        {
+            return false;
+        }
+
+        
     }
 
     return true;
@@ -232,7 +292,7 @@ Polygon_2 SimulatedAnnealing::localAnnealing()
                 return poly;
             }
 
-        }while(validityLocal(q, r, s, p, tree));
+        }while(!validityLocal(q, r, s, p, tree));
 
         cout << endl;
         //make transition
@@ -258,10 +318,67 @@ Polygon_2 SimulatedAnnealing::localAnnealing()
 }
 
 Polygon_2 SimulatedAnnealing::globalAnnealing()
-{for(int annealingIteration = 0; annealingIteration < L; annealingIteration++)
+{
+    double T = 1;
+
+    Point_2 q, r, s, p, t;
+    PointListIterator qIndex, rIndex, sIndex, pIndex, tIndex;
+    int selectionQ, selectionS;
+
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(0.0,1.0);
+
+    while(T > 0)
     {
-        cout << "global: "  << annealingIteration << endl;
+        cout << "X" << endl;;
+        double energyInitial = getEnergy();
+        PointListIterator begin = poly.vertices_begin();
+        PointListIterator end = poly.vertices_end();
+
+        //get random valid transition
+        do
+        {
+            //select random q and s
+            selectionQ = rand()%n;
+            do{selectionS = rand()%n;}while(selectionS == selectionQ);
+            
+            //get q, p, r, s and t points
+            qIndex = begin + selectionQ;
+            rIndex = qIndex + 1; if(rIndex == end) rIndex = begin;
+            pIndex = (selectionQ == 0) ? end - 1 : qIndex - 1;
+            
+            sIndex = begin + selectionS;
+            tIndex = sIndex + 1; if(tIndex == end) tIndex = begin;
+            
+            q = *(qIndex);
+            r = *(rIndex);
+            s = *(sIndex);
+            p = *(pIndex);
+            t = *(tIndex);
+
+            cout << '.';
+
+        }while(!validityGlobal(q, r, s, p, t));
+
+        cout << endl;
+        moveVertex(qIndex, tIndex);
+
+        double energyFinal = getEnergy();
+        double DE = energyFinal - energyInitial;
+
+        //if energy increased, and Metropolis criterion doesn't hold revert change
+        if(DE >= 0)
+        {
+            if(exp(-(DE/T)) < distribution(generator))
+            {
+                qIndex = (tIndex == begin) ? end - 1 : tIndex - 1;
+                moveVertex(qIndex, rIndex);
+            }
+        }
+
+        T = T - (1 / (double) L);
     }
+
     return poly;
 }
 
