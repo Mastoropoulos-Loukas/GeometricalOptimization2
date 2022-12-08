@@ -22,6 +22,7 @@ public:
     void moveVertex(PointListIterator, PointListIterator);
 
     bool validityLocal(Point_2, Point_2, Point_2, Point_2, Tree&);
+    bool validityGlobal(Point_2, Point_2, Point_2, Point_2, Point_2);
 
     Segment_2 getEdgeFromSource(Point_2);
     Segment_2 getEdgeFromTarget(Point_2);
