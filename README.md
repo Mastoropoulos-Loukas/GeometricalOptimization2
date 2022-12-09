@@ -161,7 +161,7 @@
     </ul>
     Παράδειγματα εκτέλεσης: <br>
     <code>./optimal_polygon -i ./instances/data/images/euro-night-0000015.instance -o result.txt -algorithm ant_colony -L 5 -max -alpha 1.0 -beta 1.0 -ro 0.05 -elitism 0 -gen onion</code><br>
-    <code>./optimal_polygon -i ./instances/data/images/euro-night-0000060.instance -o result.txt -algorithm local_search -L 10 -min -threshold 0.16 -gen convex_hull</code><br>
+    <code>./optimal_polygon -i ./instances/data/images/euro-night-0000020.instance -o result.txt -algorithm local_search -L 10 -min -threshold 0.16 -gen convex_hull</code><br>
     <code>./optimal_polygon -i ./instances/data/images/euro-night-0000020.instance -o result.txt -algorithm simulated_annealing -L 10 -min -annealing local -gen convex_hull</code><br>
     
 
