@@ -24,7 +24,7 @@ using std::ifstream;
 
 void getPointsFromFile(string filepath, int& size, PointList& points, long& convexHullArea);
 void handleArgs(ArgFlags& argFlags, int& argc, char**& argv);
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, double initialArea, std::chrono::milliseconds duration);
+void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, long convexHullArea, long initialArea, std::chrono::milliseconds duration);
 string getAlgorithmString(ArgFlags argFlags);
 void printArguments(ArgFlags& argFlags);
 
@@ -338,7 +338,7 @@ string getAlgorithmString(ArgFlags argFlags)
     return algorithm + "_" + optimizationType;
 }
 
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, int convexHullArea, double initialArea, std::chrono::milliseconds duration){
+void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, long convexHullArea, long initialArea, std::chrono::milliseconds duration){
     std::ofstream outfile(filepath);
 
     outfile << "Optimal Area Polygonization" << endl;
@@ -349,15 +349,15 @@ void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, i
         outfile << *iter << endl;
     outfile << "Algorithm: " << getAlgorithmString(argFlags) << endl;
 
-    double polygonArea =  abs(polygon.area());
+    long polygonArea =  abs(polygon.area());
 
     if(argFlags.algorithm != ant_colony)
         outfile << "area_initial: " << initialArea << endl;
     outfile << "area: " << polygonArea << endl;
 
     if(argFlags.algorithm != ant_colony)
-        outfile << "ratio_initial: " << convexHullArea / initialArea << endl;
-    outfile << "ratio: " << convexHullArea / polygonArea << endl;
+        outfile << "ratio_initial: " << (double) convexHullArea / initialArea << endl;
+    outfile << "ratio: " << (double) convexHullArea / polygonArea << endl;
 
     outfile << "construction time: " << duration.count() << endl;
     return;
