@@ -155,7 +155,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           
           improved=true; // we actually improved our polygon
           
-          score=(double) ar/convexHullArea; // the new score
+          score=(double)ar/(double)(this->convexHullArea); // the new score
           
           if(type==maximization){ // We mark the changes we applied, based on what kind of improvement we want
             it->area=-1;
