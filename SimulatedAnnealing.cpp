@@ -417,7 +417,6 @@ double SimulatedAnnealing::maximizationEnergy()
     return this->n * (1 - (polygonArea() / this->chpArea));
 }
 
-
 double SimulatedAnnealing::polygonArea()
 {
     return abs(this->poly.area());
