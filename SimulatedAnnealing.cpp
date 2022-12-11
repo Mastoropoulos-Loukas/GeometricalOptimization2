@@ -20,41 +20,6 @@ Polygon_2 SimulatedAnnealing::optimalPolygon()
 {
     std::srand(time(NULL));
 
-    /*Point_2 A(3,0), B(3,3), C(1,1), D(2,3), E(0,3), F(0,2), G(1, 2), H(0, 0);
-    Polygon_2 polygon;
-    polygon.push_back(A); polygon.push_back(B); polygon.push_back(C); polygon.push_back(D); polygon.push_back(E); polygon.push_back(F); polygon.push_back(G); polygon.push_back(H);
-
-    this->poly = polygon;
-
-    std::ofstream polyDump("initial.wkt");
-    CGAL::IO::write_polygon_WKT(polyDump, polygon);
-
-    Tree tree;
-    initializeTree(tree, this->poly);
-
-    Point_2 q, r, s, p;
-    PointListIterator qIndex, rIndex, sIndex, pIndex;
-
-
-    PointListIterator begin = polygon.vertices_begin();
-    PointListIterator end = polygon.vertices_end();
-
-    int selection = 2;
-    qIndex = begin + selection;
-    rIndex = qIndex + 1; if(rIndex == end) rIndex = begin;
-    sIndex = rIndex + 1; if(sIndex == end) sIndex = begin;
-    pIndex = (selection == 0) ? end - 1 : qIndex - 1;
-
-    q = *(qIndex);
-    r = *(rIndex);
-    s = *(sIndex);
-    p = *(pIndex);
-
-    cout << "Q: " << q << "  R: " << r << "  S: " << s << "  P: " << p << endl;
-    cout << validityLocal(q, r, s, p, tree) << endl;  
-
-    return this->poly; */
-
     switch (annealingType)
     {
     case local:
@@ -398,9 +363,9 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0.0,1.0);
 
+    int iter = 0;
     while(T > 0)
     {
-        cout << "T: " << T << endl;
         double energyInitial = getEnergy();
         PointListIterator begin = poly.vertices_begin();
         PointListIterator end = poly.vertices_end();
@@ -426,11 +391,9 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
             p = *(pIndex);
             t = *(tIndex);
 
-            cout << '.';
-
         }while(!validityGlobal(q, r, s, p, t));
 
-        cout << endl;
+        Polygon_2 temp = this->poly;
         moveVertex(qIndex, tIndex, this->poly);
 
         double energyFinal = getEnergy();
@@ -441,8 +404,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         {
             if(exp(-(DE/T)) < distribution(generator))
             {
-                qIndex = (tIndex == begin) ? end - 1 : tIndex - 1;
-                moveVertex(qIndex, rIndex, this->poly);
+                this->poly = temp;
             }
         }
 
