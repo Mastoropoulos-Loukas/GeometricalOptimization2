@@ -14,9 +14,46 @@ SimulatedAnnealing::SimulatedAnnealing(Polygon_2& initial, double cHullArea, Arg
     this->chpArea = cHullArea;
 }
 
+void initializeTree(Tree&, Polygon_2&);
+
 Polygon_2 SimulatedAnnealing::optimalPolygon()
 {
     std::srand(time(NULL));
+
+    /*Point_2 A(3,0), B(3,3), C(1,1), D(2,3), E(0,3), F(0,2), G(1, 2), H(0, 0);
+    Polygon_2 polygon;
+    polygon.push_back(A); polygon.push_back(B); polygon.push_back(C); polygon.push_back(D); polygon.push_back(E); polygon.push_back(F); polygon.push_back(G); polygon.push_back(H);
+
+    this->poly = polygon;
+
+    std::ofstream polyDump("initial.wkt");
+    CGAL::IO::write_polygon_WKT(polyDump, polygon);
+
+    Tree tree;
+    initializeTree(tree, this->poly);
+
+    Point_2 q, r, s, p;
+    PointListIterator qIndex, rIndex, sIndex, pIndex;
+
+
+    PointListIterator begin = polygon.vertices_begin();
+    PointListIterator end = polygon.vertices_end();
+
+    int selection = 2;
+    qIndex = begin + selection;
+    rIndex = qIndex + 1; if(rIndex == end) rIndex = begin;
+    sIndex = rIndex + 1; if(sIndex == end) sIndex = begin;
+    pIndex = (selection == 0) ? end - 1 : qIndex - 1;
+
+    q = *(qIndex);
+    r = *(rIndex);
+    s = *(sIndex);
+    p = *(pIndex);
+
+    cout << "Q: " << q << "  R: " << r << "  S: " << s << "  P: " << p << endl;
+    cout << validityLocal(q, r, s, p, tree) << endl;  
+
+    return this->poly; */
 
     switch (annealingType)
     {
@@ -75,9 +112,9 @@ double maxY(Point_2 a, Point_2 b, Point_2 c, Point_2 d)
 Fuzzy_iso_box getQueryBox(Point_2 a, Point_2 b, Point_2 c, Point_2 d) 
 {
     double xmin = minX(a, b, c, d);
-    double xmax = minX(a, b, c, d);
-    double ymin = minX(a, b, c, d);
-    double ymax = minX(a, b, c, d);
+    double xmax = maxX(a, b, c, d);
+    double ymin = minY(a, b, c, d);
+    double ymax = maxY(a, b, c, d);
     
     return Fuzzy_iso_box(Point_2(xmin, ymin), Point_2(xmax, ymax));
 }
@@ -134,7 +171,7 @@ Segment_2 SimulatedAnnealing::getEdgeFromTarget(Point_2 target)
             if(iter == begin)
                 source = *(end - 1);
             else    
-                target = *(iter - 1);
+                source = *(iter - 1);
 
             return Segment_2(source, target);
         }
@@ -145,21 +182,22 @@ Segment_2 SimulatedAnnealing::getEdgeFromTarget(Point_2 target)
 bool SimulatedAnnealing::validityLocal(Point_2 q, Point_2 r, Point_2 s, Point_2 p, Tree& tree)
 {
 
-    Segment_2 newEdge1 = Segment_2(p, r);
-    Segment_2 newEdge2 = Segment_2(q, s);
-    
+    Segment_2 edgePR = Segment_2(p, r);
+    Segment_2 edgeQS = Segment_2(q, s);
 
     //if new segments intersect each other, return false
-    if(CGAL::do_intersect(newEdge1, newEdge2))
+    if(CGAL::do_intersect(edgePR, edgeQS))
         return false;
     
     //check if the new segments intersect another edge with the tree
     
+    Fuzzy_iso_box query = getQueryBox(p, q, r, s);
+
     //get points in box
     PointList result;
     getQueryResult(
         result,
-        getQueryBox(p, q, r, s),
+        query,
         tree
     );
 
@@ -170,13 +208,55 @@ bool SimulatedAnnealing::validityLocal(Point_2 q, Point_2 r, Point_2 s, Point_2 
         Segment_2 s1 = getEdgeFromSource(testPoint);
         Segment_2 s2 = getEdgeFromTarget(testPoint);
 
-        if(
-            CGAL::do_intersect(s1, newEdge1) ||
-            CGAL::do_intersect(s1, newEdge2) ||
-            CGAL::do_intersect(s2, newEdge1) ||
-            CGAL::do_intersect(s2, newEdge2)
+        Point_2 s1Source = s1.source();
+        Point_2 s1Target = s1.target();
+
+        Point_2 s2Source = s2.source();
+        Point_2 s2Target = s2.target();
+
+        //s1 and pr
+        if
+        (
+            CGAL::do_intersect(s1, edgePR) &&
+            s1Source != p && s1Source != r &&
+            s1Target != p && s1Target != r
         )
+        {
             return false;
+        }
+            
+        //s1 and qs
+        if
+        (
+            CGAL::do_intersect(s1, edgeQS) &&
+            s1Source != q && s1Source != s &&
+            s1Target != q && s1Target != s
+        )
+        {
+            return false;
+        }
+
+        //s2 and pr
+        if
+        (
+            CGAL::do_intersect(s2, edgePR) &&
+            s2Source != p && s2Source != r &&
+            s2Target != p && s2Target != r
+        )
+        {
+            return false;    
+        }
+
+        //s2 and qs
+        if
+        (
+            CGAL::do_intersect(s2, edgeQS) &&
+            s2Source != q && s2Source != s &&
+            s2Target != q && s2Target != s
+        )
+        {
+            return false;
+        }
 
     }
 
@@ -248,7 +328,6 @@ bool SimulatedAnnealing::validityGlobal(Point_2 q, Point_2 r, Point_2 s, Point_2
 
 Polygon_2 SimulatedAnnealing::localAnnealing()
 {
-
     Tree tree;
     initializeTree(tree, poly);
 
@@ -258,21 +337,20 @@ Polygon_2 SimulatedAnnealing::localAnnealing()
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0.0,1.0);
-        
+
+    int iteration = 1;
     while(T > 0)
     {
-        cout << "T: " << T << endl;
         double energyInitial = getEnergy();
         PointListIterator begin = poly.vertices_begin();
         PointListIterator end = poly.vertices_end();
 
-        int selection = rand()%n;
-        int transitionsTried = 1;
+        int selection;
 
         //get random valid transition
         do
         {
-            cout << ".";
+            selection = rand()%n;
             qIndex = begin + selection;
             rIndex = qIndex + 1; if(rIndex == end) rIndex = begin;
             sIndex = rIndex + 1; if(sIndex == end) sIndex = begin;
@@ -284,17 +362,8 @@ Polygon_2 SimulatedAnnealing::localAnnealing()
             p = *(pIndex);
 
             selection = (selection + 1) % n;
-
-            //avoid infinite loop, due to bad code
-            if(transitionsTried == n)
-            {
-                cout << "could not find valid transition" << endl;
-                return poly;
-            }
-
         }while(!validityLocal(q, r, s, p, tree));
 
-        cout << endl;
         //make transition
         *rIndex = q;
         *qIndex = r;
@@ -310,8 +379,9 @@ Polygon_2 SimulatedAnnealing::localAnnealing()
                 *rIndex = r;
                 *qIndex = q;
             }
+                
         }
-
+        
         T = T - (1 / (double)L);    
     }
     return poly;
@@ -330,7 +400,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
 
     while(T > 0)
     {
-        cout << "X" << endl;;
+        cout << "T: " << T << endl;
         double energyInitial = getEnergy();
         PointListIterator begin = poly.vertices_begin();
         PointListIterator end = poly.vertices_end();
@@ -361,7 +431,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         }while(!validityGlobal(q, r, s, p, t));
 
         cout << endl;
-        moveVertex(qIndex, tIndex);
+        moveVertex(qIndex, tIndex, this->poly);
 
         double energyFinal = getEnergy();
         double DE = energyFinal - energyInitial;
@@ -372,7 +442,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
             if(exp(-(DE/T)) < distribution(generator))
             {
                 qIndex = (tIndex == begin) ? end - 1 : tIndex - 1;
-                moveVertex(qIndex, rIndex);
+                moveVertex(qIndex, rIndex, this->poly);
             }
         }
 
@@ -391,9 +461,12 @@ Polygon_2 SimulatedAnnealing::subdivisionAnnealing()
     return poly;
 }
 
-void SimulatedAnnealing::moveVertex(PointListIterator from, PointListIterator to)
+void SimulatedAnnealing::moveVertex(PointListIterator from, PointListIterator to, Polygon_2& poly)
 {
-    Point_2 p = *from;
+    if(to == poly.vertices_end())
+        to = poly.vertices_begin();
+    
+    Point_2 p = *(from);
     poly.erase(from);
     poly.insert(to, p);
     return;

@@ -19,7 +19,7 @@ public:
     double minimizationEnergy();
     double maximizationEnergy();
     double getEnergy();
-    void moveVertex(PointListIterator, PointListIterator);
+    void moveVertex(PointListIterator, PointListIterator, Polygon_2&);
 
     bool validityLocal(Point_2, Point_2, Point_2, Point_2, Tree&);
     bool validityGlobal(Point_2, Point_2, Point_2, Point_2, Point_2);
