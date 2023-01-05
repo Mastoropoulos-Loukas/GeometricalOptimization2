@@ -81,6 +81,8 @@ int main(int argc, char **argv)
             break;
     }
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     p = generator->generatePolygon();
 
     PolygonOptimizer* optimizer;    //optimization
@@ -107,7 +109,7 @@ int main(int argc, char **argv)
         p
     );
     
-    auto start = std::chrono::high_resolution_clock::now();
+
 
     optimalPolygon = optimizer->optimalPolygon();
 
