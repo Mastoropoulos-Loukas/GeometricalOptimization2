@@ -36,10 +36,17 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   OptimizationType type=this->type; // the type of the improvement, min or max
 
-  double threshold=this->threshold; // the threshold given by the command line
-                          //Consider turning threshold into score +- 0.10
+
   double score = (double)oldArea/(double)(this->convexHullArea); // the score of our polygon, as described in the paper provided
 
+  double threshold; // the threshold given by the command line
+                          //Consider turning threshold into score +- 0.10
+
+  if(this->type==minimization){
+    threshold=score - this->threshold;
+  }else{
+    threshold=score + this->threshold;
+  }
   
   COUT<<"INITIAL SCORE IS "<<score<<ENDL;
 
