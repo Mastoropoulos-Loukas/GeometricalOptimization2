@@ -87,7 +87,6 @@ int main(int argc, char **argv)
 
     PolygonOptimizer* optimizer;    //optimization
     Polygon_2 optimalPolygon;
-    
 
     switch(argFlags.algorithm){
         case local_search:
@@ -109,7 +108,10 @@ int main(int argc, char **argv)
         p
     );
     
+    double initial_area;
 
+    if (argFlags.algorithm != local_search)
+        initial_area = abs(p.area());
 
     optimalPolygon = optimizer->optimalPolygon();
 
@@ -121,15 +123,17 @@ int main(int argc, char **argv)
         pointDump,
         list
     );
+    
     CGAL::IO::write_polygon_WKT(
         optimalDump,
         optimalPolygon
     );
+    
 
-    // printArguments(argFlags);
+    printArguments(argFlags);
 
     //write output
-    writePolygonToFile(argFlags.outputFile, optimalPolygon, argFlags, convexHullArea, abs(p.area()),duration);
+    writePolygonToFile(argFlags.outputFile, optimalPolygon, argFlags, convexHullArea, initial_area, duration);
 
     delete generator;
     delete optimizer;

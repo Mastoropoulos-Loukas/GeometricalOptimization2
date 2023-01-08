@@ -20,6 +20,25 @@ Polygon_2 SimulatedAnnealing::optimalPolygon()
 {
     std::srand(time(NULL));
 
+    // this->poly.clear();
+
+    Point_2 A(5,0), B(4,2), C(1,4), D(1, 1), E(2,3), F(3, 1.5), G(3, 0), H(0, 0), I(0.2, 2), J(0, 5), K(5,5);
+    PointList points;
+    points.push_back(A); points.push_back(B); points.push_back(C); points.push_back(D); points.push_back(E); points.push_back(F);  points.push_back(G);  points.push_back(H); points.push_back(I); points.push_back(J); points.push_back(K);
+
+    /*for(PointListIterator iter = points.begin(); iter != points.end(); iter++)
+        poly.push_back(*iter);
+
+    std::ofstream dump("points.wkt"), dump2("initial.wkt");
+    CGAL::IO::write_multi_point_WKT(
+        dump,
+        points
+    );
+    CGAL::IO::write_polygon_WKT(
+        dump2,
+        poly
+    );*/
+
     switch (annealingType)
     {
     case local:
@@ -363,7 +382,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0.0,1.0);
 
-    int iter = 0;
+    int iter = 1;
     while(T > 0)
     {
         double energyInitial = getEnergy();
@@ -396,6 +415,14 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         Polygon_2 temp = this->poly;
         moveVertex(qIndex, tIndex, this->poly);
 
+        std::string name = "dump" + std::to_string(iter) + ".wkt";
+        std::ofstream dump(name);
+        CGAL::IO::write_polygon_WKT(
+            dump,
+            poly
+        );
+
+
         double energyFinal = getEnergy();
         double DE = energyFinal - energyInitial;
 
@@ -404,12 +431,15 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         {
             if(exp(-(DE/T)) < distribution(generator))
             {
-                this->poly = temp;
+                moveVertex(tIndex, qIndex, this->poly);
             }
         }
 
         T = T - (1 / (double) L);
+        iter++;
     }
+
+    cout << iter << endl;
 
     return poly;
 }
