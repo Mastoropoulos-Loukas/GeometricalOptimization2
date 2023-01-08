@@ -382,7 +382,6 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0.0,1.0);
 
-    int iter = 1;
     while(T > 0)
     {
         double energyInitial = getEnergy();
@@ -415,14 +414,6 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         Polygon_2 temp = this->poly;
         moveVertex(qIndex, tIndex, this->poly);
 
-        std::string name = "dump" + std::to_string(iter) + ".wkt";
-        std::ofstream dump(name);
-        CGAL::IO::write_polygon_WKT(
-            dump,
-            poly
-        );
-
-
         double energyFinal = getEnergy();
         double DE = energyFinal - energyInitial;
 
@@ -436,11 +427,7 @@ Polygon_2 SimulatedAnnealing::globalAnnealing()
         }
 
         T = T - (1 / (double) L);
-        iter++;
     }
-
-    cout << iter << endl;
-
     return poly;
 }
 
