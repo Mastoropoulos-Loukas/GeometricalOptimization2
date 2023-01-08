@@ -22,12 +22,12 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   
   int length=this->length;
 
-  if (length<=0 || length>=finalPoly.size() || length>10){
+  if (length<=0 || length>=sizeBefore || length>10){
     if(length <=0 || length>10){    
       COUT<<"L must range from 1 to 10 "<<ENDL;
     }
 
-    if(length>=finalPoly.size()){
+    if(length>=sizeBefore){
       COUT<<"L must range from 1 to "<< finalPoly.size() -1<<ENDL;      
     }
 
@@ -39,21 +39,41 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   double score = (double)oldArea/(double)(this->convexHullArea); // the score of our polygon, as described in the paper provided
 
-  double threshold; // the threshold given by the command line
+  double thres; // the threshold given by the command line
                           //Consider turning threshold into score +- 0.10
 
   if(this->type==minimization){
-    threshold=score - this->threshold;
+
+    if(sizeBefore<100){
+      if(score<0.40){
+        thres=0.20;
+      }else{
+        thres=score/2;
+      }
+
+    }else{
+      thres = score - this->threshold;
+    }
+
   }else{
-    threshold=score + this->threshold;
+
+    if(sizeBefore<100){
+      thres=0.84;
+    }else{
+      thres = score + this->threshold;
+    }
+
+
   }
-  
+
+
+  COUT<<"THRESHOLD is "<<thres<<ENDL;
   COUT<<"INITIAL SCORE IS "<<score<<ENDL;
 
   std::list<areaChange> possibleChanges; // The list of the changes to be applied at the suboptimal polygon IN OR OUT?
   
   // while the improvement between the old and the new polygon is not negligable
-  while(checkThreshold(threshold,score,type)){
+  while(checkThreshold(thres,score,type)){
     
 
     // We iterate over the edges of the polygon
@@ -120,7 +140,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
     // There is a chance that we found no elligalbe changes. We need to exit
     if(possibleChanges.empty()){
-      score=threshold;
+      score=thres;
     }
 
     // We sort the list depending on what type of optimization we want
@@ -175,7 +195,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           
           finalPoly=polyOnRoids; // Our polygon becomes the new and improved one
 
-          if(!checkThreshold(threshold,score,type)){
+          if(!checkThreshold(thres,score,type)){
             // it=possibleChanges.end();
             break;
           }
@@ -186,7 +206,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
     // If we haven't improved in this iteration, there is no need to keep looking
     if(!improved){
-      score=threshold;
+      score=thres;
     }else{ // If we have improved, we need to reorganize our list so that the applied changes are in the end
       if(type==maximization){
         possibleChanges.sort(compareAlterMax);
