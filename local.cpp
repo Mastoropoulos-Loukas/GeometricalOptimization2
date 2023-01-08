@@ -37,14 +37,17 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   OptimizationType type=this->type; // the type of the improvement, min or max
 
   double threshold=this->threshold; // the threshold given by the command line
+                          //Consider turning threshold into score +- 0.10
   double score = (double)oldArea/(double)(this->convexHullArea); // the score of our polygon, as described in the paper provided
 
   
+  COUT<<"INITIAL SCORE IS "<<score<<ENDL;
 
-  std::list<areaChange> possibleChanges; // The list of the changes to be applied at the suboptimal polygon
+  std::list<areaChange> possibleChanges; // The list of the changes to be applied at the suboptimal polygon IN OR OUT?
   
   // while the improvement between the old and the new polygon is not negligable
   while(checkThreshold(threshold,score,type)){
+    
 
     // We iterate over the edges of the polygon
     for (auto eit=finalPoly.edges_begin();eit!=finalPoly.edges_end();eit++){
@@ -164,6 +167,11 @@ Polygon_2 LocalAlgo::optimalPolygon(){
           }
           
           finalPoly=polyOnRoids; // Our polygon becomes the new and improved one
+
+          if(!checkThreshold(threshold,score,type)){
+            // it=possibleChanges.end();
+            break;
+          }
         }
       }
 
@@ -184,6 +192,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   if(sizeBefore==finalPoly.size() && finalPoly.is_simple()){
     COUT<<"DONE IMPROVING"<<ENDL;
+    COUT<<"FINAL SCORE IS "<< abs((double) finalPoly.area()/this->convexHullArea)<<ENDL;
   }else{
     
     if(sizeBefore!=finalPoly.size()){
@@ -243,7 +252,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
     if(alter1.area!=alter2.area){
       return (alter1.area<alter2.area);
     }else{
-      return (alter1.change.V.size()<alter2.change.V.size());
+      return !(alter1.change.V.size()<alter2.change.V.size());
     }
   }
 
