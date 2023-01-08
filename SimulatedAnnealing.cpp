@@ -5,11 +5,11 @@
 
 using std::cout; using std::endl;
 
-SimulatedAnnealing::SimulatedAnnealing(Polygon_2& initial, double cHullArea, ArgFlags argFlags) : PolygonOptimizer(initial)
+SimulatedAnnealing::SimulatedAnnealing(Polygon_2& initial, double cHullArea, int L, OptimizationType type, AnnealingType annType) : PolygonOptimizer(initial)
 {
-    this->optimizationType = argFlags.optimizationType;
-    this->L = argFlags.L;
-    this->annealingType = argFlags.annealingType;
+    this->optimizationType = type;
+    this->L = L;
+    this->annealingType = annType;
     this->n = initial.size();
     this->chpArea = cHullArea;
 }

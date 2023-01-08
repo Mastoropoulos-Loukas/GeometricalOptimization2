@@ -56,4 +56,18 @@ struct ArgFlags{
     std::string errorMessage;
 };
 
+struct ArgumentFlags{
+    std::string inputDirectory;
+    std::string outputFile;
+    std::string preprocess;
+
+    bool error;
+    std::string errorMessage;
+};
+
+struct testResults{
+    double min_score;
+    double max_score;
+};
+
 #endif

@@ -32,7 +32,7 @@ public:
     Polygon_2 subdivisionAnnealing();
     
 
-    SimulatedAnnealing(Polygon_2&, double, ArgFlags);
+    SimulatedAnnealing(Polygon_2&, double, int, OptimizationType, AnnealingType);
     virtual Polygon_2 optimalPolygon();
 };
 
