@@ -19,6 +19,7 @@
 #include "ant.h"
 
 #include "DefaultHandler.h"
+#include "ResultLogger.h"
   
 using std::cout;
 using std::endl;
@@ -42,16 +43,29 @@ int main(int argc, char **argv)
         return -1;
     }
 
-
+    ResultLogger logger;
+    AlgorithmHandler *handler;
+    bool starting = true;
     for (const auto & entry : std::filesystem::directory_iterator(argFlags.inputDirectory))
     {
-        AlgorithmHandler *handler = new DefaultHandler(entry.path());
-    
-        cout << "File: " << entry.path() << endl;
-        cout << "Score: " << handler->onionAnnealing(minimization) << endl << endl;
+        if(starting)
+        {   
+            handler = new DefaultHandler(entry.path());
+            starting = false;
+        } 
+        else
+            handler->resetFile(entry.path());
 
-        delete handler;
+        int size = handler->getSize();
+        double minScore =  handler->onionAnnealing(minimization);
+        double maxScore =  handler->onionAnnealing(maximization);
+
+        logger.updateEntry(size, Combination::onionAnn, minScore, maxScore);
     }
+
+    delete handler;
+
+    logger.printLogger(argFlags.outputFile);
 
     // AlgorithmHandler *handler = new DefaultHandler(argFlags.inputDirectory);
     

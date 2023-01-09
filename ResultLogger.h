@@ -5,8 +5,21 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 
-typedef std::map<int, ResultEntry*> Dictionary;
+template<typename ... Args>
+std::string string_format( const std::string& format, Args ... args )
+{
+    int size_s = std::snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+    if( size_s <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
+    auto size = static_cast<size_t>( size_s );
+    std::unique_ptr<char[]> buf( new char[ size ] );
+    std::snprintf( buf.get(), size, format.c_str(), args ... );
+    return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+}
+
+
 
 struct ResultEntry
 {
@@ -32,24 +45,25 @@ std::string combinationName(Combination combo)
     switch (combo)
     {
     case incrLocal:
-        return "Incremental & Local Search";
+        return "\t\t\t\t\tIncremental & Local Search\t\t\t\t\t";
     case incrAnn:
-        return "Incremental & Simulated Annealing";
+        return "\t\t\t\tIncremental & Simulated Annealing\t\t\t\t";
     case chullLocal:
-        return "Convex Hull & Local Search";
+        return "\t\t\t\t\tConvex Hull & Local Search\t\t\t\t\t";
     case chullAnn:
-        return "Convex Hull & Simulated Annealing";
+        return "\t\t\t\tConvex Hull & Simulated Annealing\t\t\t\t";
     case onionLocal:
-        return "Onion & Local Search";
+        return "\t\t\t\t\tOnion & Local Search\t\t\t\t\t\t";
     case onionAnn:
-        return "Onion & Simulated Annealing";
+        return "\t\t\t\t\tOnion & Simulated Annealing\t\t\t\t\t";
     case antColony:
-        return "Ant Colony";
+        return "\t\t\t\t\t\t\tAnt Colony\t\t\t\t\t\t\t";
     default:
         return "Unknown combination";
     }
 }
 
+typedef std::map<int, ResultEntry*> Dictionary;
 
 class ResultLogger
 {
@@ -83,8 +97,8 @@ void ResultLogger::updateEntry(int key, Combination combination, double minScore
         {
             log[key][i].min_score = 0;
             log[key][i].max_score = 0;
-            log[key][i].min_bound = 1;
-            log[key][i].max_bound = 0;
+            log[key][i].min_bound = -1;
+            log[key][i].max_bound = 2;
         }
     }
 
@@ -111,6 +125,40 @@ void ResultLogger::updateMaxEntry(int key, Combination combination, double maxSc
 void ResultLogger::printLogger(std::string streamName)
 {
     
+    std::ofstream outputStream(streamName);
+
+    //first row
+
+    outputStream << "\t\t||";
+    for(int i = 0; i < 7; i++) outputStream << combinationName((Combination) i) << "||";
+    outputStream << std::endl;
+
+    //second row
+
+    outputStream << "Size\t||\t";
+    for(int i = 0; i < 7; i++) outputStream << "min score\t||\t" << "max score\t||\t" << "min bound\t||\t" << "max bound\t||\t"; 
+    outputStream << std::endl;
+
+    //for all keys (aka sizes of data files)
+
+    for(auto iter = log.begin(); iter != log.end(); iter++)
+    {
+        int key = iter->first;
+        ResultEntry *logNode = log[key];
+
+        outputStream << string_format("%-8d||", key);
+        for(int i = 0; i < 7; i++)
+        {
+            outputStream << string_format("%14.2f||", logNode[i].min_score);
+            outputStream << string_format("%14.2f||", logNode[i].max_score);
+            outputStream << ((logNode[i].min_bound != -1) ? string_format("%14.2f||", logNode[i].min_bound) : "\t\t?\t\t||");
+            outputStream << ((logNode[i].max_bound != 2) ? string_format("%14.2f||", logNode[i].max_bound) : "\t\t?\t\t||"); 
+        } 
+        outputStream << std::endl;
+
+    }
+
+
 }
 
 #endif
