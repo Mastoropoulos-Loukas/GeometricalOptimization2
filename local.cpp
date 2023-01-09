@@ -55,12 +55,20 @@ Polygon_2 LocalAlgo::optimalPolygon(){
       thres = score - this->threshold;
     }
 
+    if (thres<0.20){
+      thres=0.20;
+    }
+
   }else{
 
     if(sizeBefore<100){
       thres=0.84;
     }else{
       thres = score + this->threshold;
+    }
+
+    if(thres>0.84){
+      thres=0.84;
     }
 
 
