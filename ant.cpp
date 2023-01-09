@@ -1,7 +1,8 @@
 #include"ant.h"
 #include <climits>
 #include <map>
-
+#include <ctime>
+int minmax;
 Ant::Ant(ArgFlags argFlags,PointList list, Polygon_2& poly) : PolygonOptimizer(poly){
   this->argFlags = argFlags;
   this->list=list;
@@ -208,12 +209,18 @@ return res;
 
 std::vector<Polygon_2> GenerateX(Polygon_2 space,
 std::vector<Point> list){
+
+double sizecounter[list.size()];
+
 Polygon_2 check;
 std::vector<Polygon_2> temp;
 std::vector <Segment_2> segs;
   int i=0;
   int pos=0;
   int j=0;
+  double sum=0;
+      int flag11=0;
+
 
 
     Point points[space.size()] ;
@@ -265,15 +272,82 @@ if(check_inside_Ant(v2[0],points2,points2+check.size(),Kernel())==0)
 }if(flag==0){
        temp.push_back(check);
        Pointpoped[convert(check)]=k;
+
+sizecounter[k]=check.area();
+       break;
+
+       
+
 }
      check.clear();
 
 
      }
 
+
+
+
      }
+if(k==list.size()/1.5){
 
+for (int s=0;s<=k;s++)
+{
 
+ sum+=sizecounter[s];
+}
+
+for (int s=0;s<=k;s++)
+{
+  flag11=0;
+int var=rand()%2;
+if(minmax==1){
+double prob =((sum-sizecounter[s])/sizecounter[s])/100;
+
+  if(var<abs(prob)){
+    flag11=1;
+    break;
+  }
+}
+
+if(minmax==0){
+double prob =((sizecounter[s])/sum-sizecounter[s])/100;
+
+  if(var<abs(prob)){
+    flag11=1;
+
+    break;
+  }
+}
+ 
+}
+
+if(flag11=1)
+break;
+
+}
+else if(k>list.size()/1.5)
+{
+    int var=rand()%2;
+
+if(minmax==1){
+double prob =((sum-sizecounter[k])/sizecounter[k])/100;
+
+  if(var<abs(prob)){
+
+    break;
+  }
+}
+
+if(minmax==0){
+double prob =((sizecounter[k])/sum-sizecounter[k])/100;
+
+  if(var<abs(prob)){
+
+    break;
+  }
+}
+
+}
      
 }
 
@@ -349,7 +423,7 @@ Polygon_2 Ant::optimalPolygon(){
     int min=INT_MAX;
     int min1=INT_MAX;
     int max1=-1;
-
+   
     int pos=0;
     double r=argFlags.ro;
     std::map<std::string, int> enumvals;
@@ -362,6 +436,7 @@ Polygon_2 Ant::optimalPolygon(){
     std::srand(time(0));
     Polygon_2 BestFor1Ant;
     int mode=argFlags.optimizationType; //0 for max 1 for min 
+    minmax=mode;
     int dupes=0;
     int elitismpos=0;
     int elitismk=0;
@@ -372,6 +447,7 @@ Polygon_2 Ant::optimalPolygon(){
     //Every polygon has a number assosiated with it, that is stored in enumvals
     //Using that number we can get the polygon back from polymap
     //We also store the polygons in a map so we know when an x-agon is already made in another node
+       time_t now = time(0);
     for(auto v=space.begin();v!=space.end();++v){
         enumvals[convert(v[0])]=pos;
         table2.h=v[0].area();
@@ -386,7 +462,7 @@ Polygon_2 Ant::optimalPolygon(){
 
     map.push_back(space);
     std::list<table> tablebot;
-    int K=list.size()/4;
+    int K=list.size()/6;
     int C=argFlags.L;
     std::vector <int> paths[K];
 
@@ -608,6 +684,10 @@ Polygon_2 Ant::optimalPolygon(){
     //Finally return the max or min polygon
     poly=BestForCircle;
     std::ofstream os("test.wkt");
+   time_t after = time(0);
+
+   std::cout<<"time is "<< after-now<<std::endl;
+    std::cout<<"cutoff is "<< test.size()/2<<std::endl;
 
     return poly;
 
