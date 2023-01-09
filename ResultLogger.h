@@ -63,6 +63,30 @@ std::string combinationName(Combination combo)
     }
 }
 
+std::string combinationShortName(Combination combo)
+{
+    switch (combo)
+    {
+    case incrLocal:
+        return "Incremental & Local Search";
+    case incrAnn:
+        return "Incremental & Simulated Annealing";
+    case chullLocal:
+        return "Convex Hull & Local Search";
+    case chullAnn:
+        return "Convex Hull & Simulated Annealing";
+    case onionLocal:
+        return "Onion & Local Search";
+    case onionAnn:
+        return "Onion & Simulated Annealing";
+    case antColony:
+        return "Ant Colony";
+    default:
+        return "Unknown combination";
+    }
+}
+
+
 typedef std::map<int, ResultEntry*> Dictionary;
 
 class ResultLogger

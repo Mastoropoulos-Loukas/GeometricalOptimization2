@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <thread>
 #include <cstdlib>
 #include <string.h>
 #include <filesystem>
@@ -18,6 +19,7 @@
 #include "SimulatedAnnealing.h"
 #include "ant.h"
 
+#include "AlgorithmHandler.h"
 #include "DefaultHandler.h"
 #include "ResultLogger.h"
   
@@ -29,6 +31,29 @@ using std::ifstream;
 void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv);
 void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, double convexHullArea, double initialArea, std::chrono::milliseconds duration);
 void printArguments(ArgumentFlags& argFlags);
+
+double handleAlgorithm(AlgorithmHandler& handler, Combination combo, OptimizationType type)
+{
+    switch (combo)
+    {
+    case incrLocal:
+        return handler.incrementalLocalSearch(type);
+    case incrAnn:
+        return handler.incrementalAnnealing(type);
+    case chullLocal:
+        return handler.convexHullLocalSearch(type);
+    case chullAnn:
+        return handler.convexHullAnnealing(type);
+    case onionLocal:
+        return handler.onionLocalSearch(type);
+    case onionAnn:
+        return handler.onionAnnealing(type);
+    case antColony:
+        return handler.antColony(type);
+    }
+
+    return 0.0;
+}
 
 int main(int argc, char **argv)
 {
@@ -48,6 +73,7 @@ int main(int argc, char **argv)
     bool starting = true;
     for (const auto & entry : std::filesystem::directory_iterator(argFlags.inputDirectory))
     {
+        cout << "Working on file " << entry.path() << "..." << endl;
         if(starting)
         {   
             handler = new DefaultHandler(entry.path());
@@ -57,20 +83,22 @@ int main(int argc, char **argv)
             handler->resetFile(entry.path());
 
         int size = handler->getSize();
-        double minScore =  handler->onionAnnealing(minimization);
-        double maxScore =  handler->onionAnnealing(maximization);
 
-        logger.updateEntry(size, Combination::onionAnn, minScore, maxScore);
+        for(int i = 0; i < 6; i++)
+        {
+            cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
+            double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);
+            double maxScore =  handleAlgorithm(*handler, (Combination) i, maximization);
+            logger.updateEntry(size, (Combination) i, minScore, maxScore);
+        }
+        cout << endl;
     }
 
     delete handler;
 
-    logger.printLogger(argFlags.outputFile);
+    cout << "Done with files" << endl;
 
-    // AlgorithmHandler *handler = new DefaultHandler(argFlags.inputDirectory);
-    
-    // printArguments(argFlags);
-    // cout << "Score: " << handler->onionAnnealing(minimization) << endl;
+    logger.printLogger(argFlags.outputFile);
 
     auto start = std::chrono::high_resolution_clock::now();
 
