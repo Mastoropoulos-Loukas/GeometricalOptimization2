@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <string.h>
+#include <filesystem>
 
 #include "shared.h"
 
@@ -41,10 +42,21 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    AlgorithmHandler *handler = new DefaultHandler(argFlags.inputDirectory);
+
+    for (const auto & entry : std::filesystem::directory_iterator(argFlags.inputDirectory))
+    {
+        AlgorithmHandler *handler = new DefaultHandler(entry.path());
     
-    printArguments(argFlags);
-    cout << "Score: " << handler->onionAnnealing(minimization) << endl;
+        cout << "File: " << entry.path() << endl;
+        cout << "Score: " << handler->onionAnnealing(minimization) << endl << endl;
+
+        delete handler;
+    }
+
+    // AlgorithmHandler *handler = new DefaultHandler(argFlags.inputDirectory);
+    
+    // printArguments(argFlags);
+    // cout << "Score: " << handler->onionAnnealing(minimization) << endl;
 
     auto start = std::chrono::high_resolution_clock::now();
 

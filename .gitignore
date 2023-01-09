@@ -29,3 +29,6 @@
 !SimulatedAnnealing.h
 !ant.h
 !ant.cpp
+!AlgorithmHandler.h
+!DefaultHandler.h
+!ResultLogger.h
