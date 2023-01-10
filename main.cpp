@@ -22,6 +22,7 @@
 #include "AlgorithmHandler.h"
 #include "DefaultHandler.h"
 #include "ResultLogger.h"
+#include "SmartHandler.h"
   
 using std::cout;
 using std::endl;
@@ -75,7 +76,15 @@ int main(int argc, char **argv)
         cout << "Working on file " << entry.path() << "..." << endl;
         if(starting)
         {   
-            handler = new DefaultHandler(entry.path());
+            if(argFlags.preprocess == "smart")
+            {
+                handler = new SmartHandler(entry.path());
+            }
+            else
+            {
+                handler = new DefaultHandler(entry.path());
+            }
+                
             starting = false;
         } 
         else
@@ -83,7 +92,7 @@ int main(int argc, char **argv)
 
         int size = handler->getSize();
 
-        for(int i = 0; i < 7; i++)
+        for(int i = 0; i < 6; i++)
         {
             cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
             double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);
@@ -139,7 +148,7 @@ void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv)
                 waitingForArg = 0;
                 break;
             case 3:
-                argFlags.outputFile = string(arg);
+                argFlags.preprocess = string(arg);
                 waitingForArg = 0;
                 break;
         }
