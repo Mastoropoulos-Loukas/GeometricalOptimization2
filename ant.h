@@ -10,10 +10,10 @@
 
 class Ant : public PolygonOptimizer{
 private:
-    ArgFlags argFlags;
+    AntParameters argFlags;
     PointList list;
 public:
-    Ant(ArgFlags argFlags,PointList list,Polygon_2& poly);
+    Ant(AntParameters argFlags,PointList list,Polygon_2& poly);
     virtual Polygon_2 optimalPolygon();
 };
 

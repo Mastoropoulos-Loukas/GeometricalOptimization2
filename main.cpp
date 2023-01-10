@@ -29,7 +29,6 @@ using std::string;
 using std::ifstream;
 
 void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv);
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, double convexHullArea, double initialArea, std::chrono::milliseconds duration);
 void printArguments(ArgumentFlags& argFlags);
 
 double handleAlgorithm(AlgorithmHandler& handler, Combination combo, OptimizationType type)
@@ -84,7 +83,7 @@ int main(int argc, char **argv)
 
         int size = handler->getSize();
 
-        for(int i = 0; i < 6; i++)
+        for(int i = 0; i < 7; i++)
         {
             cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
             double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);
@@ -161,30 +160,7 @@ void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv)
     return;
 }
 
-void writePolygonToFile(string filepath, Polygon_2 polygon, ArgFlags argFlags, double convexHullArea, double initialArea, std::chrono::milliseconds duration){
-    std::ofstream outfile(filepath);
 
-    outfile << "Optimal Area Polygonization" << endl;
-
-    for(auto iter = polygon.vertices_begin(); iter != polygon.vertices_end(); ++iter)
-        outfile << *iter << endl;
-    for(auto iter = polygon.edges_begin(); iter != polygon.edges_end(); ++iter)
-        outfile << *iter << endl;
-    // outfile << "Algorithm: " << getAlgorithmString(argFlags) << endl;
-
-    double polygonArea =  abs(polygon.area());
-
-    if(argFlags.algorithm != ant_colony)
-        outfile << "area_initial: " << initialArea << endl;
-    outfile << "area: " << polygonArea << endl;
-
-    if(argFlags.algorithm != ant_colony)
-        outfile << "ratio_initial: " << (double) convexHullArea / initialArea << endl;
-    outfile << "ratio: " << (double) convexHullArea / polygonArea << endl;
-
-    outfile << "construction time: " << duration.count() << endl;
-    return;
-}
 
 void printArguments(ArgumentFlags& argFlags)
 {

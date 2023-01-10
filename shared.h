@@ -33,27 +33,18 @@ enum OptimazationAlgorithm {local_search, simulated_annealing, ant_colony};
 enum AnnealingType {local, global, subdivision};
 enum OptimizationType {maximization, minimization};
 
-struct ArgFlags{
-    std::string inputFile;
-    std::string outputFile;
+struct AntParameters{
     
-    GenerationAlgorithm genAlg;
-    EdgeSelection  edgeSelection;
-    Initialization initialization;
-    
-    OptimazationAlgorithm algorithm;
     int L;
     OptimizationType optimizationType;
     double threshold;
     AnnealingType annealingType;
-
     double alpha;
     double beta;
     double ro;
     int elitism;
+    int enable_breaks;
 
-    bool error;
-    std::string errorMessage;
 };
 
 struct ArgumentFlags{

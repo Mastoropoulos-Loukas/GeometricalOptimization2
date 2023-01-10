@@ -3,7 +3,7 @@
 #include <map>
 #include <ctime>
 int minmax;
-Ant::Ant(ArgFlags argFlags,PointList list, Polygon_2& poly) : PolygonOptimizer(poly){
+Ant::Ant(AntParameters argFlags,PointList list, Polygon_2& poly) : PolygonOptimizer(poly){
   this->argFlags = argFlags;
   this->list=list;
   
@@ -208,7 +208,7 @@ return res;
 //Generate a list of x-agons
 
 std::vector<Polygon_2> GenerateX(Polygon_2 space,
-std::vector<Point> list){
+std::vector<Point> list, int enable_breaks){
 
 double sizecounter[list.size()];
 
@@ -272,10 +272,10 @@ if(check_inside_Ant(v2[0],points2,points2+check.size(),Kernel())==0)
 }if(flag==0){
        temp.push_back(check);
        Pointpoped[convert(check)]=k;
-
+if(enable_breaks==1){
 sizecounter[k]=check.area();
        break;
-
+}
        
 
 }
@@ -288,6 +288,7 @@ sizecounter[k]=check.area();
 
 
      }
+if(enable_breaks==1)
 if(k==list.size()/1.5){
 
 for (int s=0;s<=k;s++)
@@ -529,7 +530,7 @@ Polygon_2 Ant::optimalPolygon(){
 
                 }else{
 
-                    temp= GenerateX(next,test1);
+                    temp= GenerateX(next,test1,argFlags.enable_breaks);
                     polymap[enumvals[convert(next)]]=temp;
 
                 }
@@ -684,10 +685,6 @@ Polygon_2 Ant::optimalPolygon(){
     //Finally return the max or min polygon
     poly=BestForCircle;
     std::ofstream os("test.wkt");
-   time_t after = time(0);
-
-   std::cout<<"time is "<< after-now<<std::endl;
-    std::cout<<"cutoff is "<< test.size()/2<<std::endl;
 
     return poly;
 

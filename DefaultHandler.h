@@ -85,9 +85,17 @@ public:
 
     virtual double antColony(OptimizationType type)
     {
-        ArgFlags dummy;
+        AntParameters dummy;
         Polygon_2 dummyPoly;
+        dummy.alpha=1;
+        dummy.elitism=0;
+        dummy.beta=3;
+        dummy.L=3;
+        dummy.optimizationType=type;
+        dummy.ro=0.05;
+        dummy.enable_breaks=1;
 
+        
         Ant *optimizer = new Ant(dummy, points, dummyPoly);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
