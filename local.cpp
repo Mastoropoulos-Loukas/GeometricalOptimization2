@@ -18,7 +18,7 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   int sizeBefore=finalPoly.size();
 
-  COUT<<"NOW STARTS OPTIMAL "<<ENDL;
+  // COUT<<"NOW STARTS OPTIMAL "<<ENDL;
   
   int length=this->length;
 
@@ -75,8 +75,8 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   }
 
 
-  COUT<<"THRESHOLD is "<<thres<<ENDL;
-  COUT<<"INITIAL SCORE IS "<<score<<ENDL;
+  // COUT<<"THRESHOLD is "<<thres<<ENDL;
+  // COUT<<"INITIAL SCORE IS "<<score<<ENDL;
 
   std::list<areaChange> possibleChanges; // The list of the changes to be applied at the suboptimal polygon IN OR OUT?
   
@@ -226,8 +226,8 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   
 
   if(sizeBefore==finalPoly.size() && finalPoly.is_simple()){
-    COUT<<"DONE IMPROVING"<<ENDL;
-    COUT<<"FINAL SCORE IS "<< abs((double) finalPoly.area()/this->convexHullArea)<<ENDL;
+    // COUT<<"DONE IMPROVING"<<ENDL;
+    // COUT<<"FINAL SCORE IS "<< abs((double) finalPoly.area()/this->convexHullArea)<<ENDL;
   }else{
     
     if(sizeBefore!=finalPoly.size()){

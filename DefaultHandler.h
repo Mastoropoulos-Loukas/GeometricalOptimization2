@@ -22,7 +22,7 @@ public:
         IncAlgo *generator = new IncAlgo(points, Initialization::a1, EdgeSelection::randomSelection);
         Polygon_2 initial = generator->generatePolygon();
 
-        LocalAlgo *optimizer = new LocalAlgo(initial, convexHullArea, 0.7, type, 5);
+        LocalAlgo *optimizer = new LocalAlgo(initial, convexHullArea, 0.10, type, 1);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;
@@ -44,7 +44,7 @@ public:
         ConvexHullAlgo *generator = new ConvexHullAlgo(points, EdgeSelection::randomSelection);
         Polygon_2 initial = generator->generatePolygon();
 
-        LocalAlgo *optimizer = new LocalAlgo(initial, convexHullArea, 0.7, type, 5);
+        LocalAlgo *optimizer = new LocalAlgo(initial, convexHullArea, 0.10, type, 1);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;
@@ -63,7 +63,7 @@ public:
 
     virtual double onionLocalSearch(OptimizationType type)
     {
-        OnionAlgo *generator = new OnionAlgo(points, 1);
+        OnionAlgo *generator = new OnionAlgo(points, 3);
         Polygon_2 initial = generator->generatePolygon();
 
         LocalAlgo *optimizer = new LocalAlgo(initial, convexHullArea, 0.7, type, 5);
