@@ -183,17 +183,30 @@ public:
 
     virtual double antColony(OptimizationType type)
     {
-        AntParameters dummy;
+        AntParameters smart;
         Polygon_2 dummyPoly;
-        dummy.alpha=1;
-        dummy.elitism=0;
-        dummy.beta=3;
-        dummy.L=3;
-        dummy.optimizationType=type;
-        dummy.ro=0.05;
-        dummy.enable_breaks=1;
+        smart.alpha=1;
+        smart.elitism=0;
+        smart.beta=3;
+        if(size<=25)
+        {smart.L=4;
+        smart.enable_breaks=0;
 
-        Ant *optimizer = new Ant(dummy, points, dummyPoly);
+        }
+        else if(size<=30){
+        smart.enable_breaks=1;
+        smart.L=3;
+        smart.divisor=1.5;
+        }
+        else{
+        smart.enable_breaks=1;
+        smart.L=2;
+        smart.divisor=2;
+
+        }
+        smart.optimizationType=type;
+        smart.ro=0.05;
+        Ant *optimizer = new Ant(smart, points, dummyPoly);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;

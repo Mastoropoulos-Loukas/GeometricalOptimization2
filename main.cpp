@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 
         int size = handler->getSize();
 
-        for(int i = 0; i < 6; i++)
+        for(int i = 0; i < 7; i++)
         {
             cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
             double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);

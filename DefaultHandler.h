@@ -90,10 +90,11 @@ public:
         dummy.alpha=1;
         dummy.elitism=0;
         dummy.beta=3;
-        dummy.L=3;
+        dummy.L=2;
         dummy.optimizationType=type;
         dummy.ro=0.05;
-        dummy.enable_breaks=1;
+        dummy.enable_breaks=0;
+        dummy.divisor=2;
 
         
         Ant *optimizer = new Ant(dummy, points, dummyPoly);

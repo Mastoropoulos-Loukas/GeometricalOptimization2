@@ -44,6 +44,7 @@ struct AntParameters{
     double ro;
     int elitism;
     int enable_breaks;
+    int divisor;
 
 };
 

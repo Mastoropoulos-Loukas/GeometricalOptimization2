@@ -208,8 +208,7 @@ return res;
 //Generate a list of x-agons
 
 std::vector<Polygon_2> GenerateX(Polygon_2 space,
-std::vector<Point> list, int enable_breaks){
-
+std::vector<Point> list, int enable_breaks,int divisor){
 double sizecounter[list.size()];
 
 Polygon_2 check;
@@ -275,6 +274,7 @@ if(check_inside_Ant(v2[0],points2,points2+check.size(),Kernel())==0)
 if(enable_breaks==1){
 sizecounter[k]=check.area();
        break;
+       
 }
        
 
@@ -289,7 +289,7 @@ sizecounter[k]=check.area();
 
      }
 if(enable_breaks==1)
-if(k==list.size()/1.5){
+if(k==list.size()/divisor){
 
 for (int s=0;s<=k;s++)
 {
@@ -326,7 +326,7 @@ if(flag11=1)
 break;
 
 }
-else if(k>list.size()/1.5)
+else if(k>list.size()/divisor)
 {
     int var=rand()%2;
 
@@ -434,7 +434,6 @@ Polygon_2 Ant::optimalPolygon(){
     table table2;
     std::vector <int> num;
     std::map <int,std::vector<ant>> tables;
-    std::srand(time(0));
     Polygon_2 BestFor1Ant;
     int mode=argFlags.optimizationType; //0 for max 1 for min 
     minmax=mode;
@@ -530,7 +529,7 @@ Polygon_2 Ant::optimalPolygon(){
 
                 }else{
 
-                    temp= GenerateX(next,test1,argFlags.enable_breaks);
+                    temp= GenerateX(next,test1,argFlags.enable_breaks,argFlags.divisor);
                     polymap[enumvals[convert(next)]]=temp;
 
                 }
