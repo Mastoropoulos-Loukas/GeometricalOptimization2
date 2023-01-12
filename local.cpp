@@ -24,11 +24,11 @@ Polygon_2 LocalAlgo::optimalPolygon(){
 
   if (length<=0 || length>=sizeBefore || length>10){
     if(length <=0 || length>10){    
-      COUT<<"L must range from 1 to 10 "<<ENDL;
+      // COUT<<"L must range from 1 to 10 "<<ENDL;
     }
 
     if(length>=sizeBefore){
-      COUT<<"L must range from 1 to "<< finalPoly.size() -1<<ENDL;      
+      // COUT<<"L must range from 1 to "<< finalPoly.size() -1<<ENDL;      
     }
 
     return finalPoly;
@@ -231,11 +231,11 @@ Polygon_2 LocalAlgo::optimalPolygon(){
   }else{
     
     if(sizeBefore!=finalPoly.size()){
-      COUT<<"POINTS MISSING: "<<sizeBefore-finalPoly.size()<<ENDL<<ENDL;
+      // COUT<<"POINTS MISSING: "<<sizeBefore-finalPoly.size()<<ENDL<<ENDL;
     }
   
     if(!finalPoly.is_simple()){
-      COUT<<"NEW POLYGON IS NOT SIMPLE"<<ENDL<<ENDL;
+      // COUT<<"NEW POLYGON IS NOT SIMPLE"<<ENDL<<ENDL;
     }
 
   }

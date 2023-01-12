@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     bool starting = true;
     for (const auto & entry : std::filesystem::directory_iterator(argFlags.inputDirectory))
     {
-        cout << "Working on file " << entry.path() << "..." << endl;
+        // cout << "Working on file " << entry.path() << "..." << endl;
         if(starting)
         {   
             if(argFlags.preprocess == "smart")
@@ -92,9 +92,9 @@ int main(int argc, char **argv)
 
         int size = handler->getSize();
 
-        for(int i = 0; i < 7; i++)
+        for(int i = 0; i < 6; i++)
         {
-            cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
+            // cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
             double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);
             double maxScore =  handleAlgorithm(*handler, (Combination) i, maximization);
             logger.updateEntry(size, (Combination) i, minScore, maxScore);
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
     delete handler;
 
-    cout << "Done with files" << endl;
+    // cout << "Done with files" << endl;
 
     logger.printLogger(argFlags.outputFile);
 
