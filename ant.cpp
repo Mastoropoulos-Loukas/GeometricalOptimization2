@@ -141,6 +141,9 @@ int check_inside_Ant(Point pt, Point *pgn_begin, Point *pgn_end, Kernel traits)
       break;
   }
 
+  //should not get here
+  return -1;
+
 }
 
 std::vector<Segment_2> CheckPolAnt(Polygon_2 ,Point ,int );
@@ -200,6 +203,8 @@ return res;
 
 }
 
+//should not get here
+return res;
 
 }
 

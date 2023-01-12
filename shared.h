@@ -54,6 +54,7 @@ struct ArgumentFlags{
     std::string preprocess;
 
     bool error;
+    bool useAnt;
     std::string errorMessage;
 };
 

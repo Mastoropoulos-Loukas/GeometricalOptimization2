@@ -33,7 +33,7 @@ public:
         IncAlgo *generator = new IncAlgo(points, Initialization::a1, EdgeSelection::randomSelection);
         Polygon_2 initial = generator->generatePolygon();
 
-        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 500, type, AnnealingType::local);
+        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 2500, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;
@@ -55,7 +55,7 @@ public:
         ConvexHullAlgo *generator = new ConvexHullAlgo(points, EdgeSelection::randomSelection);
         Polygon_2 initial = generator->generatePolygon();
 
-        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 500, type, AnnealingType::local);
+        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 2500, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;
@@ -77,7 +77,7 @@ public:
         OnionAlgo *generator = new OnionAlgo(points, 1);
         Polygon_2 initial = generator->generatePolygon();
 
-        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 500, type, AnnealingType::local);
+        SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, 2500, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
         return abs(optimal.area()) / convexHullArea;

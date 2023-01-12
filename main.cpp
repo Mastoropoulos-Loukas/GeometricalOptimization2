@@ -71,9 +71,12 @@ int main(int argc, char **argv)
     ResultLogger logger;
     AlgorithmHandler *handler;
     bool starting = true;
+
+    int comboLimit = (argFlags.useAnt) ? 7 : 6;
+
     for (const auto & entry : std::filesystem::directory_iterator(argFlags.inputDirectory))
     {
-        // cout << "Working on file " << entry.path() << "..." << endl;
+        cout << "Working on file " << entry.path() << "..." << endl;
         if(starting)
         {   
             if(argFlags.preprocess == "smart")
@@ -92,11 +95,27 @@ int main(int argc, char **argv)
 
         int size = handler->getSize();
 
-        for(int i = 0; i < 6; i++)
+        for(int i = 0; i < comboLimit; i++)
         {
-            // cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
+            cout << "Combination: " << combinationShortName((Combination) i) << "..." << endl;
+
+            auto start = std::chrono::high_resolution_clock::now();
             double minScore =  handleAlgorithm(*handler, (Combination) i, minimization);
+            auto stop = std::chrono::high_resolution_clock::now();
             double maxScore =  handleAlgorithm(*handler, (Combination) i, maximization);
+            auto stop2 = std::chrono::high_resolution_clock::now();
+
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(stop2 - stop);
+
+            minScore = (duration.count() < 500*size) ? minScore : 1;
+            maxScore = (duration2.count() < 500*size) ? maxScore : 0;
+
+            cout << "duration1: " << duration.count() << endl << "  duration2: " << duration2.count() << endl;
+
+            if (minScore == 1 || maxScore == 0)
+                cout << "hit cuttof" << endl;
+
             logger.updateEntry(size, (Combination) i, minScore, maxScore);
         }
         cout << endl;
@@ -123,6 +142,7 @@ void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv)
     bool waitingOutput = true;
 
     argFlags.preprocess = "default";
+    argFlags.useAnt = false;
 
     for (int i = 1; i < argc; i++)
     {
@@ -136,6 +156,8 @@ void handleArgs(ArgumentFlags& argFlags, int& argc, char**& argv)
                     waitingForArg = 2;
                 else if (!strcmp(arg, "-preprocess"))
                     waitingForArg = 3;
+                else if (!strcmp(arg, "-useAnt"))
+                    argFlags.useAnt = true;
                 break;
             case 1:
                 argFlags.inputDirectory = string(arg);
