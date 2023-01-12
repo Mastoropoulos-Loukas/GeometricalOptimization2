@@ -39,10 +39,6 @@ public:
 
         int setSize=points.size();
 
-        if(setSize<50){
-            L=3;
-        }
-
         if(setSize<100){
             L=2;
         }
@@ -91,10 +87,6 @@ public:
         int L=1;
         int setSize=points.size();
 
-        if(setSize<50){
-            L=3;
-        }
-
         if(setSize<100){
             L=2;
         }
@@ -142,10 +134,6 @@ public:
 
         int L=1;
         int setSize=points.size();
-
-        if(setSize<50){
-            L=3;
-        }
 
         if(setSize<100){
             L=2;
