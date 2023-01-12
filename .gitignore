@@ -33,3 +33,5 @@
 !DefaultHandler.h
 !ResultLogger.h
 !SmartHandler.h
+!docs/old/*
+!docs/old
