@@ -67,7 +67,7 @@ public:
         IncAlgo *generator = new IncAlgo(points, Initialization::a1, EdgeSelection::randomSelection);
         Polygon_2 initial = generator->generatePolygon();
 
-        int L = 1000 * ((size / 100) + 1);
+        int L = std::min(1000 * ((size / 100) + 1), 4000);
         SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, L, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
@@ -117,7 +117,7 @@ public:
         ConvexHullAlgo *generator = new ConvexHullAlgo(points, selection);
         Polygon_2 initial = generator->generatePolygon();
 
-        int L = 1000 * ((size / 100) + 1);
+        int L = std::min(1000 * ((size / 100) + 1), 4000);
         SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, L, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 
@@ -165,7 +165,7 @@ public:
         OnionAlgo *generator = new OnionAlgo(points, 1);
         Polygon_2 initial = generator->generatePolygon();
 
-        int L = 1000 * ((size / 100) + 1);
+        int L = std::min(1000 * ((size / 100) + 1), 4000);
         SimulatedAnnealing *optimizer = new SimulatedAnnealing(initial, convexHullArea, L, type, AnnealingType::local);
         Polygon_2 optimal = (*optimizer).optimalPolygon();
 

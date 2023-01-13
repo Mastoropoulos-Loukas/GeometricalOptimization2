@@ -111,10 +111,10 @@ int main(int argc, char **argv)
             minScore = (duration.count() < 500*size) ? minScore : 1;
             maxScore = (duration2.count() < 500*size) ? maxScore : 0;
 
-            cout << "duration1: " << duration.count() << endl << "  duration2: " << duration2.count() << endl;
+            // cout << "duration1: " << duration.count() << endl << "  duration2: " << duration2.count() << endl;
 
-            if (minScore == 1 || maxScore == 0)
-                cout << "hit cuttof" << endl;
+            // if (minScore == 1 || maxScore == 0)
+            //     cout << "hit cuttof" << endl;
 
             logger.updateEntry(size, (Combination) i, minScore, maxScore);
         }
